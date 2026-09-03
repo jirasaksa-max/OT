@@ -819,6 +819,379 @@
       }
     }
 
+    function applyFilters() {
+      const centerVal = document.getElementById('filterCenter')?.value || 'ALL';
+      const monthVal = document.getElementById('filterMonth')?.value || 'ALL';
+      const otTypeVal = document.getElementById('filterOtType')?.value || 'ALL';
+      const keyword = (document.getElementById('filterKeyword')?.value || '').trim().toLowerCase();
+
+      filteredRecords = approvedRecords.filter(row => {
+        // 1. Center filter
+        if (centerVal !== 'ALL' && row.Center !== centerVal) return false;
+
+        // 2. Month filter
+        if (monthVal !== 'ALL' && row.Month !== monthVal) return false;
+
+        // 3. OT_Type filter
+        if (otTypeVal !== 'ALL' && row.OT_Type !== otTypeVal) return false;
+
+        // 4. Keyword search across staff, notes, center, type
+        if (keyword) {
+          const searchHaystack = `${row.StaffName || ''} ${row.Center || ''} ${row.OT_Type || ''} ${row.Note || ''}`.toLowerCase();
+          if (!searchHaystack.includes(keyword)) return false;
+        }
+
+        return true;
+      });
+
+      // Update all dashboard components with reactive data
+      renderKPIs();
+      renderMatrixTable();
+      renderCharts();
+      renderRawTable();
+    }
+
+    function resetFilters() {
+      const centerEl = document.getElementById('filterCenter');
+      const monthEl = document.getElementById('filterMonth');
+      const otTypeEl = document.getElementById('filterOtType');
+      const keywordEl = document.getElementById('filterKeyword');
+
+      if (centerEl) centerEl.value = 'ALL';
+      if (monthEl) monthEl.value = 'ALL';
+      if (otTypeEl) otTypeEl.value = 'ALL';
+      if (keywordEl) keywordEl.value = '';
+
+      applyFilters();
+      showToastNotification('ล้างตัวกรองทั้งหมดแล้ว', 'info');
+    }
+
+    function toggleMatrixView(isDetail) {
+      isDetailedMatrix = Boolean(isDetail);
+
+      const compactBtn = document.getElementById('matrixCompactBtn');
+      const detailBtn = document.getElementById('matrixDetailBtn');
+
+      if (compactBtn && detailBtn) {
+        if (isDetailedMatrix) {
+          detailBtn.className = "px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition";
+          compactBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        } else {
+          compactBtn.className = "px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition";
+          detailBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        }
+      }
+
+      renderMatrixTable();
+    }
+
+    function renderKPIs() {
+      const totalCost = filteredRecords.reduce((acc, r) => acc + (Number(r.CalculatedPrice) || 0), 0);
+      const totalCases = filteredRecords.length;
+      const avgCost = totalCases > 0 ? totalCost / totalCases : 0;
+
+      // Group totals by Center
+      const centerTotals = {};
+      filteredRecords.forEach(r => {
+        centerTotals[r.Center] = (centerTotals[r.Center] || 0) + (Number(r.CalculatedPrice) || 0);
+      });
+      let topCenterName = '-';
+      let topCenterAmount = 0;
+      Object.entries(centerTotals).forEach(([center, amount]) => {
+        if (amount > topCenterAmount) {
+          topCenterAmount = amount;
+          topCenterName = center;
+        }
+      });
+
+      // Group totals by OT_Type
+      const typeTotals = {};
+      filteredRecords.forEach(r => {
+        typeTotals[r.OT_Type] = (typeTotals[r.OT_Type] || 0) + (Number(r.CalculatedPrice) || 0);
+      });
+      let topTypeName = '-';
+      let topTypeAmount = 0;
+      Object.entries(typeTotals).forEach(([type, amount]) => {
+        if (amount > topTypeAmount) {
+          topTypeAmount = amount;
+          topTypeName = type;
+        }
+      });
+
+      // Write to DOM
+      const kpiTotalEl = document.getElementById('kpiTotalApproved');
+      const kpiCasesEl = document.getElementById('kpiTotalCases');
+      const kpiAvgEl = document.getElementById('kpiAveragePerCase');
+      const kpiTopCenterEl = document.getElementById('kpiTopCenter');
+      const kpiTopCenterAmountEl = document.getElementById('kpiTopCenterAmount');
+      const kpiTopTypeEl = document.getElementById('kpiTopOtType');
+      const kpiTopTypeAmountEl = document.getElementById('kpiTopOtTypeAmount');
+
+      if (kpiTotalEl) kpiTotalEl.innerText = formatTHB(totalCost);
+      if (kpiCasesEl) kpiCasesEl.innerText = totalCases.toLocaleString('th-TH');
+      if (kpiAvgEl) kpiAvgEl.innerText = `เฉลี่ย ${formatTHB(avgCost)} / รายการ`;
+
+      if (kpiTopCenterEl) kpiTopCenterEl.innerText = topCenterName;
+      if (kpiTopCenterAmountEl) {
+        const pct = totalCost > 0 ? ((topCenterAmount / totalCost) * 100).toFixed(1) : 0;
+        kpiTopCenterAmountEl.innerText = `${formatTHB(topCenterAmount)} (${pct}% ของยอดรวม)`;
+      }
+
+      if (kpiTopTypeEl) kpiTopTypeEl.innerText = topTypeName;
+      if (kpiTopTypeAmountEl) kpiTopTypeAmountEl.innerText = formatTHB(topTypeAmount);
+    }
+
+    function renderMatrixTable() {
+      const thead = document.getElementById('matrixHead');
+      const tbody = document.getElementById('matrixBody');
+      const tfoot = document.getElementById('matrixFoot');
+      const stats = document.getElementById('matrixRecordStats');
+
+      if (!thead || !tbody || !tfoot) return;
+
+      // Extract unique months from all approved data (or filtered)
+      const allMonths = [...new Set(approvedRecords.map(r => r.Month).filter(Boolean))].sort();
+      const centers = [...new Set(filteredRecords.map(r => r.Center).filter(Boolean))].sort();
+
+      if (centers.length === 0) {
+        thead.innerHTML = `<tr><th class="py-3 px-4">ศูนย์บริการ</th><th class="py-3 px-4 text-right">ยอดรวม</th></tr>`;
+        tbody.innerHTML = `<tr><td colspan="2" class="py-8 text-center text-slate-400">ไม่พบข้อมูลที่ตรงกับตัวกรองที่เลือก</td></tr>`;
+        tfoot.innerHTML = ``;
+        if (stats) stats.innerText = '0 รายการ';
+        return;
+      }
+
+      // 1. Build Header
+      let headerHTML = `<tr>`;
+      if (isDetailedMatrix) {
+        headerHTML += `<th class="py-3 px-4 border-b border-slate-200">ศูนย์บริการ (Center)</th>`;
+        headerHTML += `<th class="py-3 px-4 border-b border-slate-200">ประเภท OT (OT_Type)</th>`;
+      } else {
+        headerHTML += `<th class="py-3 px-4 border-b border-slate-200">ศูนย์บริการ (Center)</th>`;
+      }
+
+      allMonths.forEach(m => {
+        headerHTML += `<th class="py-3 px-4 text-right border-b border-slate-200 whitespace-nowrap">${formatMonthTh(m)}</th>`;
+      });
+      headerHTML += `<th class="py-3 px-4 text-right border-b border-slate-200 font-bold bg-slate-100/70">รวมสุทธิ (THB)</th></tr>`;
+      thead.innerHTML = headerHTML;
+
+      // 2. Build Body
+      let bodyHTML = '';
+      const monthGrandTotals = {};
+      allMonths.forEach(m => monthGrandTotals[m] = 0);
+      let grandTotalOverall = 0;
+
+      if (!isDetailedMatrix) {
+        // Compact View: Center x Month
+        centers.forEach(center => {
+          const centerRecords = filteredRecords.filter(r => r.Center === center);
+          let rowTotal = 0;
+
+          bodyHTML += `<tr class="hover:bg-teal-50/40 transition">`;
+          bodyHTML += `<td class="py-3.5 px-4 font-semibold text-slate-900">${sanitizeText(center)}</td>`;
+
+          allMonths.forEach(m => {
+            const sum = centerRecords.filter(r => r.Month === m).reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+            rowTotal += sum;
+            monthGrandTotals[m] += sum;
+            bodyHTML += `<td class="py-3.5 px-4 text-right font-mono ${sum > 0 ? 'text-slate-800 font-medium' : 'text-slate-300'}">${sum > 0 ? formatTHB(sum) : '-'}</td>`;
+          });
+
+          grandTotalOverall += rowTotal;
+          bodyHTML += `<td class="py-3.5 px-4 text-right font-mono font-bold text-teal-700 bg-slate-50/80">${formatTHB(rowTotal)}</td>`;
+          bodyHTML += `</tr>`;
+        });
+      } else {
+        // Detailed View: Center x OT_Type x Month
+        centers.forEach(center => {
+          const centerRecords = filteredRecords.filter(r => r.Center === center);
+          const typesInCenter = [...new Set(centerRecords.map(r => r.OT_Type))].sort();
+          let centerSubtotal = 0;
+          const centerMonthSubtotals = {};
+          allMonths.forEach(m => centerMonthSubtotals[m] = 0);
+
+          typesInCenter.forEach((type, idx) => {
+            const typeRecords = centerRecords.filter(r => r.OT_Type === type);
+            let typeRowTotal = 0;
+
+            bodyHTML += `<tr class="hover:bg-slate-50 transition">`;
+            if (idx === 0) {
+              bodyHTML += `<td rowspan="${typesInCenter.length + 1}" class="py-3 px-4 font-semibold text-slate-900 border-r border-slate-100 bg-slate-50/30 align-top">${sanitizeText(center)}</td>`;
+            }
+
+            bodyHTML += `<td class="py-2.5 px-4 text-slate-700">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 border border-slate-200">${sanitizeText(type)}</span>
+            </td>`;
+
+            allMonths.forEach(m => {
+              const sum = typeRecords.filter(r => r.Month === m).reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+              typeRowTotal += sum;
+              centerMonthSubtotals[m] += sum;
+              monthGrandTotals[m] += sum;
+              bodyHTML += `<td class="py-2.5 px-4 text-right font-mono text-xs ${sum > 0 ? 'text-slate-800' : 'text-slate-300'}">${sum > 0 ? formatTHB(sum) : '-'}</td>`;
+            });
+
+            centerSubtotal += typeRowTotal;
+            bodyHTML += `<td class="py-2.5 px-4 text-right font-mono text-xs font-semibold text-slate-800 bg-slate-50/50">${formatTHB(typeRowTotal)}</td>`;
+            bodyHTML += `</tr>`;
+          });
+
+          // Subtotal Row for Center
+          bodyHTML += `<tr class="bg-teal-50/30 font-semibold border-b border-slate-200">`;
+          bodyHTML += `<td class="py-2 px-4 text-xs text-teal-800 font-bold uppercase tracking-wide">ยอดรวม (${sanitizeText(center)})</td>`;
+          allMonths.forEach(m => {
+            bodyHTML += `<td class="py-2 px-4 text-right font-mono text-xs font-bold text-teal-700">${centerMonthSubtotals[m] > 0 ? formatTHB(centerMonthSubtotals[m]) : '-'}</td>`;
+          });
+          grandTotalOverall += centerSubtotal;
+          bodyHTML += `<td class="py-2 px-4 text-right font-mono text-xs font-bold text-teal-900 bg-teal-100/50">${formatTHB(centerSubtotal)}</td>`;
+          bodyHTML += `</tr>`;
+        });
+      }
+
+      tbody.innerHTML = bodyHTML;
+
+      // 3. Build Foot (Grand Total)
+      let footHTML = `<tr>`;
+      footHTML += `<td ${isDetailedMatrix ? 'colspan="2"' : ''} class="py-3 px-4 font-bold text-slate-900">ยอดรวมทั้งสิ้น (Grand Total)</td>`;
+      allMonths.forEach(m => {
+        footHTML += `<td class="py-3 px-4 text-right font-mono font-bold text-slate-900">${monthGrandTotals[m] > 0 ? formatTHB(monthGrandTotals[m]) : '-'}</td>`;
+      });
+      footHTML += `<td class="py-3 px-4 text-right font-mono font-bold text-emerald-700 bg-emerald-100/60">${formatTHB(grandTotalOverall)}</td>`;
+      footHTML += `</tr>`;
+      tfoot.innerHTML = footHTML;
+
+      if (stats) {
+        stats.innerText = `รวมทั้งสิ้น ${filteredRecords.length.toLocaleString('th-TH')} รายการ | ยอดสุทธิ ${formatTHB(grandTotalOverall)}`;
+      }
+    }
+
+    function renderCharts() {
+      // 1. Prepare Line Trend Data
+      const allMonths = [...new Set(approvedRecords.map(r => r.Month).filter(Boolean))].sort();
+      const centers = [...new Set(filteredRecords.map(r => r.Center).filter(Boolean))].sort();
+
+      const colorPalette = [
+        { border: '#0d9488', bg: 'rgba(13, 148, 136, 0.1)' },
+        { border: '#0284c7', bg: 'rgba(2, 132, 199, 0.1)' },
+        { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' },
+        { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+        { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' },
+        { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' }
+      ];
+
+      const trendDatasets = centers.map((center, idx) => {
+        const color = colorPalette[idx % colorPalette.length];
+        const centerRecords = filteredRecords.filter(r => r.Center === center);
+        const dataPoints = allMonths.map(m => {
+          return centerRecords.filter(r => r.Month === m).reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+        });
+
+        return {
+          label: center,
+          data: dataPoints,
+          borderColor: color.border,
+          backgroundColor: color.bg,
+          borderWidth: 2.5,
+          tension: 0.35,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true
+        };
+      });
+
+      const trendCtx = document.getElementById('monthlyTrendChart')?.getContext('2d');
+      if (trendCtx) {
+        if (trendChartInstance) trendChartInstance.destroy();
+        trendChartInstance = new Chart(trendCtx, {
+          type: 'line',
+          data: {
+            labels: allMonths.map(m => formatMonthTh(m)),
+            datasets: trendDatasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { boxWidth: 12, usePointStyle: true, font: { family: 'Prompt', size: 12 } }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.dataset.label}: ${formatTHB(context.parsed.y)}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: val => '฿' + (val >= 1000 ? (val / 1000).toLocaleString() + 'k' : val),
+                  font: { family: 'Inter', size: 11 }
+                },
+                grid: { color: 'rgba(226, 232, 240, 0.6)' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { font: { family: 'Prompt', size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Prepare Doughnut Data (by OT_Type)
+      const typeTotals = {};
+      filteredRecords.forEach(r => {
+        typeTotals[r.OT_Type] = (typeTotals[r.OT_Type] || 0) + (Number(r.CalculatedPrice) || 0);
+      });
+      const typeLabels = Object.keys(typeTotals);
+      const typeData = Object.values(typeTotals);
+
+      const doughnutColors = ['#14b8a6', '#0284c7', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b'];
+
+      const doughnutCtx = document.getElementById('otTypeDoughnutChart')?.getContext('2d');
+      if (doughnutCtx) {
+        if (doughnutChartInstance) doughnutChartInstance.destroy();
+        doughnutChartInstance = new Chart(doughnutCtx, {
+          type: 'doughnut',
+          data: {
+            labels: typeLabels,
+            datasets: [{
+              data: typeData,
+              backgroundColor: doughnutColors.slice(0, typeLabels.length),
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { boxWidth: 10, font: { family: 'Prompt', size: 11 } }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const val = context.parsed;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                    return `${context.label}: ${formatTHB(val)} (${pct}%)`;
+                  }
+                }
+              }
+            },
+            cutout: '68%'
+          }
+        });
+      }
+    }
+
     function renderRawTable() {
       const tbody = document.getElementById('rawTableBody');
       const counter = document.getElementById('tableRecordCount');
