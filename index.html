@@ -103,7 +103,13 @@
                 Approved Only
               </span>
             </div>
-            <p class="text-xs text-slate-500">ระบบสรุปและวิเคราะห์ค่าตอบแทน OT ศูนย์เลสิกแบบเรียลไทม์</p>
+            <div class="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+              <span>แหล่งข้อมูล: ชีต</span>
+              <a href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="font-mono text-cyan-700 hover:text-cyan-800 hover:underline flex items-center gap-0.5" title="เปิด Google Sheets ต้นทาง">
+                <span>OT_Data (1Foty...PtBk)</span>
+                <i data-lucide="external-link" class="w-3 h-3"></i>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -112,7 +118,7 @@
           <!-- Real-time Status Badge -->
           <div id="liveStatusContainer" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-600">
             <span id="syncIndicator" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="lastSyncText">อัปเดต: เมื่อสักครู่</span>
+            <span id="lastSyncText">กำลังเชื่อมต่อชีต...</span>
           </div>
 
           <!-- Refresh Now Button -->
@@ -399,16 +405,28 @@
       </div>
 
       <div class="space-y-4 text-xs sm:text-sm">
-        <!-- Google Sheets CSV URL Input -->
+        <!-- Google Sheets ID or URL Input -->
         <div>
           <label class="block font-medium text-slate-700 mb-1">
-            URL เผยแพร่ของ Google Sheets (Publish to web as CSV):
+            Google Spreadsheet ID หรือ URL เต็ม:
           </label>
-          <input type="text" id="sheetCsvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&output=csv" 
+          <input type="text" id="sheetIdInput" placeholder="1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk" 
             class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
-          <p class="text-[11px] text-slate-400 mt-1">
-            * ใน Google Sheet เลือก: <em>ไฟล์ (File) &gt; แชร์ (Share) &gt; เผยแพร่ไปยังเว็บ (Publish to web) &gt; เลือกแผ่นงาน OT_Data &gt; รูปแบบ .CSV</em>
-          </p>
+          <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
+            <span>* รองรับทั้ง URL ที่แชร์หรือเฉพาะ Sheet ID</span>
+            <a href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" class="text-cyan-600 hover:underline flex items-center gap-0.5">
+              เปิดชีตต้นฉบับ <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Target Sheet Name (Tab) -->
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">
+            ชื่อแผ่นงาน (Sheet Tab Name):
+          </label>
+          <input type="text" id="sheetTabInput" value="OT_Data" placeholder="OT_Data" 
+            class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
         </div>
 
         <!-- Real-time Polling Interval -->
@@ -417,7 +435,7 @@
             <label class="block font-medium text-slate-700 mb-1">ความถี่ในการดึงข้อมูลอัตโนมัติ:</label>
             <select id="autoRefreshInterval" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
               <option value="0">ปิดการดึงอัตโนมัติ (Manual)</option>
-              <option value="15000">ทุก 15 วินาที (High-frequency)</option>
+              <option value="15000">ทุก 15 วินาที (Real-time สูงสุด)</option>
               <option value="30000" selected>ทุก 30 วินาที (แนะนำ)</option>
               <option value="60000">ทุก 1 นาที</option>
               <option value="300000">ทุก 5 นาที</option>
@@ -433,17 +451,15 @@
           </div>
         </div>
 
-        <!-- Quick Demo Dataset Switcher -->
-        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
-          <div class="flex items-center justify-between">
-            <div>
-              <span class="font-semibold text-slate-800 text-xs">ชุดข้อมูลเริ่มต้น (Demo Dataset):</span>
-              <p class="text-[11px] text-slate-500">สร้างจากข้อมูลตัวอย่างศูนย์เลสิกจริง (สาขาสยาม, พระราม 9, เชียงใหม่, พัทยา)</p>
-            </div>
-            <button onclick="loadSampleDefaultData()" class="px-2.5 py-1 text-xs bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-700">
-              โหลดข้อมูลตัวอย่าง
-            </button>
+        <!-- Quick Reset to user's Google Sheet -->
+        <div class="bg-cyan-50/50 rounded-xl p-3 border border-cyan-100 flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-cyan-900 text-xs">Google Sheet ประจำระบบ (OT_Lasik Rate):</span>
+            <p class="text-[11px] text-cyan-700 font-mono">ID: 1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk (OT_Data)</p>
           </div>
+          <button onclick="resetToTargetSheet()" class="px-2.5 py-1 text-xs bg-white border border-cyan-200 hover:bg-cyan-50 rounded-lg text-cyan-800 font-medium transition">
+            ตั้งค่าเริ่มต้น
+          </button>
         </div>
       </div>
 
@@ -479,6 +495,25 @@
     let autoRefreshTimer = null;
     let trendChartInstance = null;
     let pieChartInstance = null;
+
+    // Configured Target Google Sheet details
+    const TARGET_SPREADSHEET_ID = "1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk";
+    const TARGET_SHEET_NAME = "OT_Data";
+
+    // Helper to build CSV URL using Google Visualization API (GViz)
+    function buildGoogleSheetCsvUrl(sheetIdOrUrl, tabName = "OT_Data") {
+      let sheetId = (sheetIdOrUrl || TARGET_SPREADSHEET_ID).trim();
+      
+      // If user provided a full Google Sheet URL, extract the ID
+      const match = sheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        sheetId = match[1];
+      }
+
+      const encodedTab = encodeURIComponent(tabName || TARGET_SHEET_NAME);
+      // GViz CSV export endpoint
+      return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodedTab}`;
+    }
 
     // Default sample OT_Data reflecting authentic Thai Hospital/Lasik center operations
     // Contains rows with Status: Approved, Pending, Rejected to demonstrate strict Approved-only filtering
@@ -554,18 +589,27 @@
     function normalizeData(data) {
       return data.map((item, idx) => {
         // Detect Center
-        const center = item.Center || item.center || item.Branch || item['ศูนย์'] || item['สาขา'] || 'ไม่ระบุศูนย์';
+        const center = item.Center || item.center || item.Branch || item['ศูนย์'] || item['สาขา'] || item['ศูนย์เลสิก'] || 'ไม่ระบุศูนย์';
         
         // Detect OT_Type
-        const otType = item.OT_Type || item.ot_type || item.OtType || item['ประเภทOT'] || item['ประเภท'] || 'General OT';
+        const otType = item.OT_Type || item.ot_type || item.OtType || item.Procedure || item['ประเภทOT'] || item['ประเภท'] || 'General OT';
         
-        // Detect Status
+        // Detect Status (Support both English 'Approved' and Thai 'อนุมัติ')
         const status = (item.Status || item.status || item['สถานะ'] || 'Pending').trim();
         
-        // Detect CalculatedPrice (remove comma, parse to float)
-        let rawPrice = item.CalculatedPrice ?? item.calculated_price ?? item.Price ?? item['ยอดเงิน'] ?? item['ค่าตอบแทน'] ?? 0;
+        // Detect CalculatedPrice (remove comma, currency symbols, parse to float)
+        let rawPrice = item.CalculatedPrice ?? item.calculated_price ?? item.TotalPrice ?? item.Price ?? item['ยอดเงิน'] ?? item['ค่าตอบแทน'] ?? item['ยอดรวม'] ?? 0;
         if (typeof rawPrice === 'string') {
           rawPrice = parseFloat(rawPrice.replace(/[^0-9.-]+/g, '')) || 0;
+        }
+
+        // If CalculatedPrice is 0 but Rate and Units exist, calculate product
+        if (!rawPrice) {
+          const rate = parseFloat(item.Rate || item.PricePerUnit || item['อัตรา'] || 0) || 0;
+          const units = parseFloat(item.Units || item.Cases || item.Hours || item['จำนวน'] || item['จำนวนเคส'] || 0) || 0;
+          if (rate > 0 && units > 0) {
+            rawPrice = rate * units;
+          }
         }
 
         // Detect Date / Month
@@ -576,13 +620,13 @@
         }
 
         return {
-          ID: item.ID || item.id || `OT-${idx + 1}`,
+          ID: item.ID || item.id || item.OT_ID || `OT-${idx + 1}`,
           Date: dateStr,
           Month: month || '2026-01',
           Center: center.trim(),
-          StaffName: item.StaffName || item.Doctor || item.Nurse || item['ชื่อ'] || item['ผู้ปฏิบัติงาน'] || 'บุคลากร',
+          StaffName: item.StaffName || item.Doctor || item.Nurse || item.Staff || item['ชื่อ'] || item['ผู้ปฏิบัติงาน'] || 'บุคลากร',
           OT_Type: otType.trim(),
-          Units: parseFloat(item.Units || item.Hours || item['จำนวน'] || 1) || 1,
+          Units: parseFloat(item.Units || item.Cases || item.Hours || item['จำนวน'] || 1) || 1,
           CalculatedPrice: Number(rawPrice) || 0,
           Status: status,
           Note: item.Note || item.Remarks || item['หมายเหตุ'] || ''
@@ -592,9 +636,11 @@
 
     function processAndFilterData() {
       // MANDATORY CRITERIA:
-      // ดึงข้อมูลเฉพาะ Approved ของคอลัม Status เท่านั้น
+      // ดึงข้อมูลเฉพาะ Approved ของคอลัม Status เท่านั้น (รองรับทั้ง Approved, approved, อนุมัติ, อนุมัติแล้ว)
       approvedDataset = rawDataset.filter(item => {
-        return item.Status && item.Status.toLowerCase() === 'approved';
+        if (!item.Status) return false;
+        const s = item.Status.toLowerCase().trim();
+        return s === 'approved' || s === 'อนุมัติ' || s === 'อนุมัติแล้ว';
       });
 
       // Populate filter dropdowns dynamically based on approved data
@@ -1032,53 +1078,54 @@
             borderWidth: 2,
             borderColor: '#ffffff'
           }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '68%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 10, padding: 12 }
-            },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => {
-                  const total = data.reduce((a, b) => a + b, 0);
-                  const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0;
-                  return ` ${ctx.label}: ${formatTHB(ctx.raw)} (${pct}%)`;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
+    async function fetchLiveGoogleSheet(customUrlOrId = null, tabName = null) {
+      const targetId = customUrlOrId || localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
+      const targetTab = tabName || localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
+      const directUrl = buildGoogleSheetCsvUrl(targetId, targetTab);
 
-    async function fetchLiveGoogleSheet(url) {
-      if (!url) return false;
       const refreshIcon = document.getElementById('refreshIcon');
       refreshIcon.classList.add('animate-spin');
 
       try {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        const csvText = await response.text();
+        let csvText = null;
+
+        // Try direct fetch first
+        try {
+          const response = await fetch(directUrl, { cache: 'no-store' });
+          if (response.ok) {
+            csvText = await response.text();
+          }
+        } catch (corsErr) {
+          console.warn('Direct fetch failed (likely CORS), attempting via proxy...', corsErr);
+        }
+
+        // If direct fetch was blocked by browser CORS policy, fallback to safe proxy
+        if (!csvText || csvText.includes('<!DOCTYPE html>')) {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
+          const proxyResponse = await fetch(proxyUrl, { cache: 'no-store' });
+          if (proxyResponse.ok) {
+            csvText = await proxyResponse.text();
+          }
+        }
+
+        if (!csvText) {
+          throw new Error('ไม่สามารถดึงข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบสิทธิ์การแชร์ชีต');
+        }
+
         const parsed = parseCSV(csvText);
         if (parsed.length > 0) {
           rawDataset = normalizeData(parsed);
           processAndFilterData();
           updateSyncIndicator(true);
-          showToast(`ซิงค์ข้อมูลเรียลไทม์สำเร็จ (${rawDataset.length} แถว)`, 'success');
+          showToast(`ซิงค์ข้อมูลเรียลไทม์จาก OT_Data สำเร็จ (${approvedDataset.length} รายการ Approved)`, 'success');
           return true;
         } else {
-          throw new Error('ไม่พบแถวข้อมูลในชีต');
+          throw new Error('ไม่พบแถวข้อมูลในชีต OT_Data');
         }
       } catch (err) {
         console.error('Fetch Google Sheet failed:', err);
         updateSyncIndicator(false);
-        showToast(`ซิงค์ไม่สำเร็จ: ${err.message}`, 'error');
+        showToast(`เชื่อมต่อชีตไม่สำเร็จ: ${err.message}`, 'error');
         return false;
       } finally {
         refreshIcon.classList.remove('animate-spin');
@@ -1086,15 +1133,7 @@
     }
 
     function triggerRefresh() {
-      const savedUrl = localStorage.getItem('ot_lasik_sheet_url');
-      if (savedUrl) {
-        fetchLiveGoogleSheet(savedUrl);
-      } else {
-        // Soft refresh with current loaded data
-        processAndFilterData();
-        updateSyncIndicator(true);
-        showToast('อัปเดตและคำนวณข้อมูลเรียบร้อย', 'success');
-      }
+      fetchLiveGoogleSheet();
     }
 
     function updateSyncIndicator(isSuccess) {
@@ -1105,7 +1144,7 @@
 
       if (isSuccess) {
         ind.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
-        txt.innerText = `อัปเดต: ${timeStr}`;
+        txt.innerText = `อัปเดต: ${timeStr} (สด)`;
       } else {
         ind.className = "w-2 h-2 rounded-full bg-rose-500";
         txt.innerText = `การเชื่อมต่อขัดข้อง (${timeStr})`;
@@ -1126,9 +1165,12 @@
     }
 
     function openConfigModal() {
-      const savedUrl = localStorage.getItem('ot_lasik_sheet_url') || '';
+      const savedId = localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
+      const savedTab = localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
       const savedInterval = localStorage.getItem('ot_lasik_refresh_interval') || '30000';
-      document.getElementById('sheetCsvUrlInput').value = savedUrl;
+      
+      document.getElementById('sheetIdInput').value = savedId;
+      document.getElementById('sheetTabInput').value = savedTab;
       document.getElementById('autoRefreshInterval').value = savedInterval;
       document.getElementById('configModal').classList.remove('hidden');
     }
@@ -1138,20 +1180,24 @@
     }
 
     function saveAndApplyConfig() {
-      const url = document.getElementById('sheetCsvUrlInput').value.trim();
+      const sheetInput = document.getElementById('sheetIdInput').value.trim() || TARGET_SPREADSHEET_ID;
+      const tabInput = document.getElementById('sheetTabInput').value.trim() || TARGET_SHEET_NAME;
       const interval = document.getElementById('autoRefreshInterval').value;
 
-      localStorage.setItem('ot_lasik_sheet_url', url);
+      localStorage.setItem('ot_lasik_sheet_id', sheetInput);
+      localStorage.setItem('ot_lasik_sheet_tab', tabInput);
       localStorage.setItem('ot_lasik_refresh_interval', interval);
 
       setupAutoRefresh(interval);
       closeConfigModal();
 
-      if (url) {
-        fetchLiveGoogleSheet(url);
-      } else {
-        showToast('บันทึกการตั้งค่าแล้ว (ใช้โหมด In-memory Data)', 'info');
-      }
+      fetchLiveGoogleSheet(sheetInput, tabInput);
+    }
+
+    function resetToTargetSheet() {
+      document.getElementById('sheetIdInput').value = TARGET_SPREADSHEET_ID;
+      document.getElementById('sheetTabInput').value = TARGET_SHEET_NAME;
+      showToast('คืนค่าเป็นชีตหลักเรียบร้อย', 'info');
     }
 
     function handleFileUpload(event) {
@@ -1166,7 +1212,7 @@
           rawDataset = normalizeData(parsed);
           processAndFilterData();
           closeConfigModal();
-          showToast(`นำเข้าไฟล์สำเร็จ ${rawDataset.length} รายการ`, 'success');
+          showToast(`นำเข้าไฟล์สำเร็จ ${rawDataset.length} รายการ (${approvedDataset.length} Approved)`, 'success');
         } else {
           showToast('ไม่พบข้อมูลที่ถูกต้องในไฟล์ CSV', 'error');
         }
@@ -1251,18 +1297,15 @@
     window.onload = function() {
       lucide.createIcons();
 
-      // Check if user previously saved a live Google Sheet URL
-      const savedUrl = localStorage.getItem('ot_lasik_sheet_url');
+      // Load saved configuration or default to user's specified Sheet ID
+      const savedId = localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
+      const savedTab = localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
       const savedInterval = localStorage.getItem('ot_lasik_refresh_interval') || '30000';
 
-      if (savedUrl) {
-        fetchLiveGoogleSheet(savedUrl);
-      } else {
-        // Initialize with default Lasik operations dataset
-        rawDataset = normalizeData(DEFAULT_LASIK_OT_DATA);
-        processAndFilterData();
-      }
+      // Load initial data from target Google Sheet
+      fetchLiveGoogleSheet(savedId, savedTab);
 
+      // Start real-time auto-refresh polling
       setupAutoRefresh(savedInterval);
     };
   </script>
