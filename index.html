@@ -3,43 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OT Lasik Analytics & Real-time Cost Summary</title>
-  
-  <!-- Fonts: Inter & Prompt for clean medical/corporate Thai typography -->
+  <title>OT Lasik Real-time Financial Dashboard</title>
+
+  <!-- Google Fonts: Prompt & Inter for high-end medical/fintech typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js for data visualization -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Lucide Icons -->
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Prompt', 'Inter', 'sans-serif'],
+            sans: ['Prompt', 'Inter', '-apple-system', 'sans-serif'],
           },
           colors: {
             brand: {
-              50: '#ecfeff',
-              100: '#cffafe',
-              500: '#06b6d4',
-              600: '#0891b2',
-              700: '#0e7490',
-              800: '#155e75',
-              900: '#164e63',
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
             },
-            clinical: {
-              navy: '#0f172a',
-              card: '#ffffff',
-              border: '#e2e8f0'
+            accent: {
+              50: '#f0f9ff',
+              500: '#0284c7',
+              600: '#0369a1',
             }
+          },
+          boxShadow: {
+            'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02)',
+            'float': '0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
           }
         }
       }
@@ -49,65 +52,72 @@
   <style>
     body {
       font-family: 'Prompt', 'Inter', sans-serif;
-      background-color: #f8fafc;
-      color: #1e293b;
+      background-color: #fafbfc;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
     }
-    
-    /* Smooth scrollbar styling */
+
+    /* Refined Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     ::-webkit-scrollbar-track {
       background: #f1f5f9;
+      border-radius: 8px;
     }
     ::-webkit-scrollbar-thumb {
       background: #cbd5e1;
-      border-radius: 9999px;
+      border-radius: 8px;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
 
     .pulse-dot {
-      animation: pulseAnimation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      animation: softPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
-    @keyframes pulseAnimation {
+    @keyframes softPulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: .4; transform: scale(1.15); }
+      50% { opacity: 0.45; transform: scale(1.15); }
     }
 
-    @media print {
-      .no-print { display: none !important; }
-      body { background: #fff !important; }
-      .print-shadow-none { box-shadow: none !important; border: 1px solid #ddd !important; }
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
 
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 transition-all">
+<body class="min-h-screen flex flex-col antialiased selection:bg-teal-500 selection:text-white">
+
+  <header class="sticky top-0 z-40 border-b border-slate-200/80 glass-nav shadow-subtle transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        
-        <!-- Brand Title & Tag -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
-            <i data-lucide="activity" class="w-6 h-6"></i>
+      <div class="flex items-center justify-between h-16 sm:h-20">
+
+        <!-- Logo & Center Identifier -->
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-600 via-teal-500 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-teal-500/20 ring-4 ring-teal-50">
+            <i data-lucide="activity" class="w-6 h-6 stroke-[2.2]"></i>
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h1 class="font-bold text-lg text-slate-900 tracking-tight leading-tight">OT Lasik Expense Hub</h1>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 pulse-dot"></span>
-                Approved Only
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">OT Lasik Analytics</h1>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
+                เฉพาะรายการ Approved
               </span>
             </div>
-            <div class="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-              <span>แหล่งข้อมูล: ชีต</span>
-              <a href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="font-mono text-cyan-700 hover:text-cyan-800 hover:underline flex items-center gap-0.5" title="เปิด Google Sheets ต้นทาง">
-                <span>OT_Data (1Foty...PtBk)</span>
-                <i data-lucide="external-link" class="w-3 h-3"></i>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5 font-medium">
+              <span class="flex items-center gap-1">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-teal-600"></i>
+                ชีต: <strong class="text-slate-700 font-semibold">OT_Data</strong>
+              </span>
+              <span class="text-slate-300">•</span>
+              <a href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 hover:underline flex items-center gap-0.5" title="เปิด Google Sheets ต้นทาง">
+                <span>เปิดดูแผ่นงานสด</span>
+                <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
               </a>
             </div>
           </div>
@@ -115,22 +125,22 @@
 
         <!-- Action Controls -->
         <div class="flex items-center gap-2 sm:gap-3">
-          <!-- Real-time Status Badge -->
-          <div id="liveStatusContainer" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-600">
-            <span id="syncIndicator" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="lastSyncText">กำลังเชื่อมต่อชีต...</span>
+          <!-- Connection Status Pill -->
+          <div id="liveStatusBadge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/80 border border-slate-200 text-xs text-slate-600">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
+            <span id="syncStatusLabel" class="font-medium">ข้อมูลพร้อมใช้งาน</span>
           </div>
 
-          <!-- Refresh Now Button -->
-          <button id="refreshBtn" onclick="triggerRefresh()" class="p-2 sm:px-3 sm:py-2 text-slate-700 hover:text-cyan-700 hover:bg-slate-100 rounded-lg text-xs sm:text-sm font-medium border border-slate-200 flex items-center gap-1.5 transition">
-            <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+          <!-- Refresh Button -->
+          <button id="refreshBtn" onclick="refreshLiveData()" class="px-3 py-2 sm:px-3.5 sm:py-2 text-slate-700 hover:text-teal-700 bg-white hover:bg-slate-50 rounded-xl text-xs sm:text-sm font-medium border border-slate-200 shadow-subtle flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4 text-slate-500"></i>
             <span class="hidden sm:inline">รีเฟรช</span>
           </button>
 
-          <!-- Sheet / Source Config Modal Button -->
-          <button onclick="openConfigModal()" class="px-3 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg text-xs sm:text-sm font-medium shadow-sm shadow-cyan-900/20 flex items-center gap-1.5 transition">
-            <i data-lucide="database" class="w-4 h-4"></i>
-            <span>ตั้งค่าแหล่งข้อมูล</span>
+          <!-- Settings Button -->
+          <button onclick="openConfigModal()" class="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs sm:text-sm font-medium shadow-md shadow-teal-700/15 flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+            <span class="hidden xs:inline">ตั้งค่าชีต</span>
           </button>
         </div>
 
@@ -140,59 +150,70 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Filter Toolbar Card -->
-    <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <!-- Filters Panel (Bright White Clean Card) -->
+    <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/70 shadow-card">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         
-        <!-- Left: Quick Filter Controls -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 flex-1">
-          <!-- Center Filter -->
+          <!-- Filter: Center -->
           <div>
-            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              <i data-lucide="building-2" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>ศูนย์ / สาขา (Center)
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              ศูนย์ / สาขา (Center)
             </label>
-            <select id="filterCenter" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
-              <option value="ALL">ทุกศูนย์บริการ (All Centers)</option>
-            </select>
+            <div class="relative">
+              <select id="filterCenter" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 pl-3 pr-8 py-2 bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+                <option value="ALL">ทุกศูนย์บริการ (All Centers)</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+            </div>
           </div>
 
-          <!-- Month Filter -->
+          <!-- Filter: Month -->
           <div>
-            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>เดือน (Month)
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              ประจำเดือน (Month)
             </label>
-            <select id="filterMonth" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
-              <option value="ALL">ทุกเดือน (All Months)</option>
-            </select>
+            <div class="relative">
+              <select id="filterMonth" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 pl-3 pr-8 py-2 bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+                <option value="ALL">ทุกเดือน (All Months)</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+            </div>
           </div>
 
-          <!-- OT Type Filter -->
+          <!-- Filter: OT Type -->
           <div>
-            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              <i data-lucide="tag" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>ประเภท OT (OT_Type)
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              ประเภท OT (OT_Type)
             </label>
-            <select id="filterOtType" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
-              <option value="ALL">ทุกประเภท (All OT Types)</option>
-            </select>
+            <div class="relative">
+              <select id="filterOtType" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 pl-3 pr-8 py-2 bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+                <option value="ALL">ทุกประเภทหัตถการ (All Types)</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+            </div>
           </div>
 
-          <!-- Search Staff / Doctor -->
+          <!-- Search keyword -->
           <div>
-            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              <i data-lucide="search" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>ค้นหาเจ้าหน้าที่ / Note
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              ค้นหาบุคลากร / หมายเหตุ
             </label>
-            <input type="text" id="filterKeyword" oninput="applyFilters()" placeholder="พิมพ์ชื่อ, รหัสพนักงาน..." class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition" />
+            <div class="relative">
+              <input type="text" id="filterKeyword" oninput="applyFilters()" placeholder="พิมพ์ชื่อแพทย์, พยาบาล..." class="w-full text-sm rounded-xl border border-slate-200 pl-9 pr-3 py-2 bg-slate-50/60 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition" />
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            </div>
           </div>
         </div>
 
-        <!-- Right: Reset & Export Button -->
-        <div class="flex items-center gap-2 self-end lg:self-center pt-2 lg:pt-0">
-          <button onclick="resetFilters()" class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition">
+        <!-- Reset and Export Actions -->
+        <div class="flex items-center gap-2 pt-1 self-end">
+          <button onclick="resetFilters()" class="px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition">
             ล้างตัวกรอง
           </button>
-          <button onclick="exportToCSV()" class="px-3.5 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center gap-1.5 transition">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-            ส่งออก CSV
+          <button onclick="exportToCSV()" class="px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/70 rounded-xl flex items-center gap-1.5 transition active:scale-95 shadow-subtle">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>ส่งออก CSV</span>
           </button>
         </div>
 
@@ -201,174 +222,184 @@
 
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
       
-      <!-- Card 1: Total Approved Amount -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+      <!-- KPI 1: Total CalculatedPrice -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card hover:border-teal-300/80 transition group">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ยอดเบิก OT อนุมัติรวม</p>
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ยอดเบิกสุทธิ (CalculatedPrice)</span>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-4 ring-emerald-50/50">
+            <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i>
           </div>
         </div>
         <div class="mt-3">
-          <div class="flex items-baseline gap-1">
-            <span class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="kpiTotalApproved">฿0</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="kpiTotalApproved">฿0</h2>
+          <div class="flex items-center gap-1.5 mt-1.5 text-xs text-emerald-600 font-medium">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>อนุมัติครบถ้วน (Status: Approved)</span>
           </div>
-          <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
-            <span class="text-emerald-600 font-medium">Approved Status เท่านั้น</span>
-          </p>
         </div>
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-50/50 rounded-full blur-xl pointer-events-none"></div>
       </div>
 
-      <!-- Card 2: Total Approved Cases -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+      <!-- KPI 2: Approved Cases Count -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card hover:border-teal-300/80 transition group">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">รายการที่อนุมัติ (Cases)</p>
-          <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
-            <i data-lucide="check-check" class="w-5 h-5"></i>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">จำนวนเคสที่อนุมัติ</span>
+          <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center ring-4 ring-sky-50/50">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
           </div>
         </div>
         <div class="mt-3">
-          <div class="flex items-baseline gap-1">
-            <span class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="kpiTotalCases">0</span>
-            <span class="text-xs text-slate-500">รายการ</span>
+          <div class="flex items-baseline gap-1.5">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="kpiTotalCases">0</h2>
+            <span class="text-xs text-slate-500 font-medium">รายการ</span>
           </div>
-          <p class="text-xs text-slate-500 mt-1" id="kpiAveragePerCase">เฉลี่ย ฿0 / รายการ</p>
+          <p class="text-xs text-slate-500 mt-1.5" id="kpiAveragePerCase">เฉลี่ย ฿0 / รายการ</p>
         </div>
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-50/50 rounded-full blur-xl pointer-events-none"></div>
       </div>
 
-      <!-- Card 3: Top Center by Cost -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+      <!-- KPI 3: Top Center by Cost -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card hover:border-teal-300/80 transition group">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ศูนย์ที่มีค่าใช้จ่ายสูงสุด</p>
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <i data-lucide="building" class="w-5 h-5"></i>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ศูนย์ที่มียอดเบิกสูงสุด</span>
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center ring-4 ring-indigo-50/50">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
           </div>
         </div>
         <div class="mt-3">
-          <h3 class="text-lg sm:text-xl font-bold text-slate-900 truncate" id="kpiTopCenter">-</h3>
-          <p class="text-xs text-slate-500 mt-1" id="kpiTopCenterAmount">฿0 (0% ของยอดทั้งหมด)</p>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 truncate" id="kpiTopCenter">-</h2>
+          <p class="text-xs text-slate-500 mt-1.5" id="kpiTopCenterAmount">฿0 (0% ของยอดรวม)</p>
         </div>
       </div>
 
-      <!-- Card 4: Top OT Type -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+      <!-- KPI 4: Top OT Type -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card hover:border-teal-300/80 transition group">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ประเภท OT สูงสุด</p>
-          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">หัตถการ OT สูงสุด</span>
+          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center ring-4 ring-teal-50/50">
             <i data-lucide="pie-chart" class="w-5 h-5"></i>
           </div>
         </div>
         <div class="mt-3">
-          <h3 class="text-lg sm:text-xl font-bold text-slate-900 truncate" id="kpiTopOtType">-</h3>
-          <p class="text-xs text-slate-500 mt-1" id="kpiTopOtTypeAmount">฿0</p>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 truncate" id="kpiTopOtType">-</h2>
+          <p class="text-xs text-slate-500 mt-1.5" id="kpiTopOtTypeAmount">฿0</p>
         </div>
       </div>
 
     </section>
 
+    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
+      <!-- Section Header -->
+      <div class="p-5 border-b border-slate-150 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
+              <i data-lucide="table-2" class="w-4 h-4"></i>
+            </div>
+            <h2 class="font-bold text-slate-900 text-base sm:text-lg">
+              ตารางสรุปเมทริกซ์ (Pivot Matrix Summary)
+            </h2>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200">
+              Center × เดือน × OT_Type
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">
+            สรุปยอด CalculatedPrice สุทธิของแต่ละศูนย์บริการในแต่ละเดือน แยกตามประเภท OT (เฉพาะสถานะ Approved)
+          </p>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="flex items-center gap-2 self-start sm:self-auto">
+          <span class="text-xs font-medium text-slate-500">รูปแบบตาราง:</span>
+          <div class="inline-flex rounded-xl border border-slate-200 bg-slate-100/80 p-0.5 text-xs">
+            <button id="matrixCompactBtn" onclick="toggleMatrixView(false)" class="px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition">
+              แบบย่อ (ศูนย์ × เดือน)
+            </button>
+            <button id="matrixDetailBtn" onclick="toggleMatrixView(true)" class="px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition">
+              แจกแจงตาม OT_Type
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Matrix Table -->
+      <div class="overflow-x-auto">
+        <table id="matrixTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead id="matrixHead" class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+            <!-- Populated via JS -->
+          </thead>
+          <tbody id="matrixBody" class="divide-y divide-slate-100 text-slate-700">
+            <!-- Populated via JS -->
+          </tbody>
+          <tfoot id="matrixFoot" class="bg-slate-100/80 border-t-2 border-slate-300 font-bold text-slate-900">
+            <!-- Populated via JS -->
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="px-5 py-3 bg-slate-50/60 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-500">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+          <span>ประมวลผลเฉพาะแถวที่มี <strong class="text-slate-700 font-semibold">Status = Approved</strong> ในชีต <strong class="text-slate-700 font-semibold">OT_Data</strong></span>
+        </div>
+        <span id="matrixRecordStats" class="font-medium text-slate-600">กำลังคำนวณ...</span>
+      </div>
+    </section>
+
     <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
-      <!-- Trend By Month and Center (2 cols on large screen) -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm lg:col-span-2">
+      <!-- Trend Line Chart -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="line-chart" class="w-4 h-4 text-cyan-600"></i>
-              แนวโน้มค่าตอบแทน OT รายเดือนแบ่งตามศูนย์ (CalculatedPrice)
-            </h2>
-            <p class="text-xs text-slate-500">เฉพาะข้อมูลสถานะ Approved เท่านั้น</p>
+            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-4 h-4 text-teal-600"></i>
+              แนวโน้มค่าตอบแทน OT รายเดือนตามศูนย์ (CalculatedPrice)
+            </h3>
+            <p class="text-xs text-slate-500">เปรียบเทียบมูลค่าการเบิกจ่ายจริงของแต่ละสาขา</p>
           </div>
-          <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">หน่วย: บาท</span>
+          <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">หน่วย: บาท (THB)</span>
         </div>
         <div class="relative h-72 sm:h-80 w-full">
           <canvas id="monthlyTrendChart"></canvas>
         </div>
       </div>
 
-      <!-- OT Type Share Breakdown (1 col on large screen) -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+      <!-- OT_Type Doughnut Breakdown -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="pie-chart" class="w-4 h-4 text-cyan-600"></i>
-              สัดส่วนค่าใช้จ่ายตาม OT_Type
-            </h2>
-            <p class="text-xs text-slate-500">สัดส่วนประเภทการทำหัตถการและเวร</p>
+            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-teal-600"></i>
+              สัดส่วนยอดเบิกตาม OT_Type
+            </h3>
+            <p class="text-xs text-slate-500">แยกตามประเภทการทำหัตถการและเวร</p>
           </div>
         </div>
         <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
-          <canvas id="otTypePieChart"></canvas>
+          <canvas id="otTypeDoughnutChart"></canvas>
         </div>
       </div>
 
     </section>
 
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
-        <div>
-          <div class="flex items-center gap-2">
-            <h2 class="font-bold text-slate-900 text-base sm:text-lg">
-              ตารางสรุปเมทริกซ์ (Pivot Summary Matrix)
-            </h2>
-            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-cyan-100 text-cyan-800">
-              Center × เดือน × OT_Type
-            </span>
-          </div>
-          <p class="text-xs text-slate-500 mt-0.5">
-            สรุปยอด CalculatedPrice สุทธิของแต่ละศูนย์บริการในแต่ละเดือน แยกตามประเภท OT
-          </p>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-500">มุมมอง:</span>
-          <div class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs">
-            <button id="matrixCompactBtn" onclick="toggleMatrixDetail(false)" class="px-3 py-1 rounded-md font-medium text-cyan-700 bg-cyan-50">แบบกระชับ</button>
-            <button id="matrixDetailBtn" onclick="toggleMatrixDetail(true)" class="px-3 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900">แบบแจกแจงทุกประเภท</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pivot Table Scrollable Container -->
-      <div class="overflow-x-auto">
-        <table id="matrixTable" class="w-full text-left border-collapse text-sm">
-          <!-- Dynamic generated by JS -->
-          <tbody id="matrixTableBody">
-            <tr>
-              <td class="p-8 text-center text-slate-400">กำลังประมวลผลข้อมูล...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div class="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <div class="flex items-center gap-2">
-          <span class="inline-block w-2.5 h-2.5 rounded bg-emerald-500"></span>
-          <span>เฉพาะข้อมูลที่ได้รับการอนุมัติ (Status = Approved) จากชีต <strong>OT_Data</strong></span>
-        </div>
-        <span id="matrixRecordCount" class="font-medium text-slate-600">0 รายการ</span>
-      </div>
-    </section>
-
-    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <section class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
       <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="font-bold text-slate-900 text-base">รายการบันทึก OT ทั้งหมด (Approved Records)</h2>
-          <p class="text-xs text-slate-500">สามารถค้นหา คัดกรอง และตรวจสอบรายละเอียดแต่ละเคส</p>
+          <h3 class="font-bold text-slate-900 text-base">รายการบันทึก OT อนุมัติ (Approved Cases Audit)</h3>
+          <p class="text-xs text-slate-500">ตรวจสอบรายละเอียดรายเคส วันที่ปฏิบัติงาน และยอดเงิน CalculatedPrice</p>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-slate-400" id="tablePageInfo">แสดง 0 รายการ</span>
+        <div class="text-xs font-medium text-slate-500" id="tableRecordCount">
+          แสดง 0 รายการ
         </div>
       </div>
 
-      <!-- Table -->
+      <!-- Table scrollable -->
       <div class="overflow-x-auto max-h-96">
         <table class="w-full text-left border-collapse text-xs sm:text-sm">
-          <thead class="sticky top-0 bg-slate-100/90 backdrop-blur text-slate-600 font-semibold border-b border-slate-200 select-none">
+          <thead class="sticky top-0 bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 backdrop-blur z-10">
             <tr>
-              <th class="py-3 px-4">วันที่ปฏิบัติงาน</th>
-              <th class="py-3 px-4">ศูนย์ (Center)</th>
+              <th class="py-3 px-4">วันที่</th>
+              <th class="py-3 px-4">ศูนย์บริการ (Center)</th>
               <th class="py-3 px-4">บุคลากร / แพทย์</th>
               <th class="py-3 px-4">ประเภท OT (OT_Type)</th>
               <th class="py-3 px-4 text-right">จำนวนเคส/ชั่วโมง</th>
@@ -377,7 +408,7 @@
             </tr>
           </thead>
           <tbody id="rawTableBody" class="divide-y divide-slate-100 text-slate-700">
-            <!-- Populated dynamically -->
+            <!-- Dynamic Rows -->
           </tbody>
         </table>
       </div>
@@ -385,90 +416,79 @@
 
   </main>
 
-  <!-- Configuration & Live Google Sheets Modal -->
-  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-float border border-slate-150 space-y-5">
       
+      <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center">
-            <i data-lucide="sliders" class="w-4 h-4"></i>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+            <i data-lucide="database" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900 text-base">ตั้งค่าการเชื่อมต่อชีต OT_Data</h3>
-            <p class="text-xs text-slate-500">ดึงข้อมูลแบบ Real-time ผ่าน Google Sheets CSV หรืออัปโหลดไฟล์</p>
+            <h4 class="font-bold text-slate-900 text-base">ตั้งค่าการเชื่อมโยงข้อมูล Real-time</h4>
+            <p class="text-xs text-slate-500">ดึงข้อมูลจากชีต OT_Data ผ่าน Google Visualization API</p>
           </div>
         </div>
-        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
+      <!-- Settings Inputs -->
       <div class="space-y-4 text-xs sm:text-sm">
-        <!-- Google Sheets ID or URL Input -->
         <div>
-          <label class="block font-medium text-slate-700 mb-1">
+          <label class="block font-semibold text-slate-700 mb-1">
             Google Spreadsheet ID หรือ URL เต็ม:
           </label>
-          <input type="text" id="sheetIdInput" placeholder="1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk" 
-            class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
-          <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
-            <span>* รองรับทั้ง URL ที่แชร์หรือเฉพาะ Sheet ID</span>
-            <a href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" class="text-cyan-600 hover:underline flex items-center gap-0.5">
-              เปิดชีตต้นฉบับ <i data-lucide="external-link" class="w-3 h-3"></i>
-            </a>
-          </div>
+          <input type="text" id="cfgSheetId" value="1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk" class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3.5 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+          <p class="text-[11px] text-slate-400 mt-1">* ชีตต้องเปิดแชร์เป็น "ทุกคนที่มีลิงก์มีสิทธิ์ดู" (Anyone with the link can view)</p>
         </div>
 
-        <!-- Target Sheet Name (Tab) -->
         <div>
-          <label class="block font-medium text-slate-700 mb-1">
+          <label class="block font-semibold text-slate-700 mb-1">
             ชื่อแผ่นงาน (Sheet Tab Name):
           </label>
-          <input type="text" id="sheetTabInput" value="OT_Data" placeholder="OT_Data" 
-            class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
+          <input type="text" id="cfgSheetTab" value="OT_Data" class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3.5 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
         </div>
 
-        <!-- Real-time Polling Interval -->
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-medium text-slate-700 mb-1">ความถี่ในการดึงข้อมูลอัตโนมัติ:</label>
-            <select id="autoRefreshInterval" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+            <label class="block font-semibold text-slate-700 mb-1">รอบเวลาดึงข้อมูลอัตโนมัติ:</label>
+            <select id="cfgAutoInterval" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
               <option value="0">ปิดการดึงอัตโนมัติ (Manual)</option>
-              <option value="15000">ทุก 15 วินาที (Real-time สูงสุด)</option>
+              <option value="15000">ทุก 15 วินาที</option>
               <option value="30000" selected>ทุก 30 วินาที (แนะนำ)</option>
               <option value="60000">ทุก 1 นาที</option>
-              <option value="300000">ทุก 5 นาที</option>
             </select>
           </div>
           <div>
-            <label class="block font-medium text-slate-700 mb-1">หรืออัปโหลดไฟล์ CSV ปัจจุบัน:</label>
-            <label class="w-full flex items-center justify-center px-3 py-2 border border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 text-cyan-700 text-xs font-medium">
+            <label class="block font-semibold text-slate-700 mb-1">หรืออัปโหลดไฟล์ CSV:</label>
+            <label class="w-full flex items-center justify-center px-3 py-2 border border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 text-teal-700 text-xs font-semibold transition">
               <i data-lucide="upload" class="w-3.5 h-3.5 mr-1.5"></i>
               <span>เลือกไฟล์ CSV</span>
-              <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileUpload(event)">
+              <input type="file" id="csvFilePicker" accept=".csv" class="hidden" onchange="handleCsvFileImport(event)">
             </label>
           </div>
         </div>
 
-        <!-- Quick Reset to user's Google Sheet -->
-        <div class="bg-cyan-50/50 rounded-xl p-3 border border-cyan-100 flex items-center justify-between">
+        <div class="p-3 bg-teal-50/60 rounded-xl border border-teal-100 flex items-center justify-between">
           <div>
-            <span class="font-semibold text-cyan-900 text-xs">Google Sheet ประจำระบบ (OT_Lasik Rate):</span>
-            <p class="text-[11px] text-cyan-700 font-mono">ID: 1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk (OT_Data)</p>
+            <div class="text-xs font-semibold text-teal-900">ชีตหลักของระบบ:</div>
+            <div class="text-[11px] font-mono text-teal-700">1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk</div>
           </div>
-          <button onclick="resetToTargetSheet()" class="px-2.5 py-1 text-xs bg-white border border-cyan-200 hover:bg-cyan-50 rounded-lg text-cyan-800 font-medium transition">
-            ตั้งค่าเริ่มต้น
+          <button onclick="resetDefaultConfig()" class="px-2.5 py-1 text-xs font-semibold text-teal-800 bg-white border border-teal-200 hover:bg-teal-50 rounded-lg transition">
+            คืนค่าเริ่มต้น
           </button>
         </div>
       </div>
 
-      <!-- Footer Buttons -->
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <!-- Modal Footer -->
+      <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
         <button onclick="closeConfigModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
           ยกเลิก
         </button>
-        <button onclick="saveAndApplyConfig()" class="px-4 py-2 text-xs font-semibold text-white bg-cyan-700 hover:bg-cyan-800 rounded-xl shadow-sm transition">
+        <button onclick="saveAndSyncConfig()" class="px-4 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-700/15 transition">
           บันทึกและซิงค์ทันที
         </button>
       </div>
@@ -476,215 +496,58 @@
     </div>
   </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm w-full bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-3 transform transition duration-300">
+  <!-- Toast Notification Box -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 hidden max-w-sm w-full bg-slate-900/95 text-white px-4 py-3 rounded-2xl shadow-float border border-slate-800 flex items-center gap-3 transform transition-all duration-300">
     <div id="toastIcon" class="text-emerald-400">
-      <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+      <i data-lucide="check-circle" class="w-5 h-5"></i>
     </div>
     <div class="flex-1">
-      <p id="toastMessage" class="text-xs font-medium leading-snug">แจ้งเตือน</p>
+      <p id="toastMsg" class="text-xs font-medium leading-snug">การแจ้งเตือน</p>
     </div>
   </div>
 
   <script>
-    // Global State
-    let rawDataset = [];       // All rows from CSV
-    let approvedDataset = [];  // Filtered rows where Status === 'Approved'
-    let filteredDataset = [];  // Current view filtered by user controls
-    let showDetailedMatrix = false;
-    let autoRefreshTimer = null;
-    let trendChartInstance = null;
-    let pieChartInstance = null;
+    // System Defaults
+    const DEFAULT_SPREADSHEET_ID = "1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk";
+    const DEFAULT_SHEET_TAB = "OT_Data";
 
-    // Configured Target Google Sheet details
-    const TARGET_SPREADSHEET_ID = "1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk";
-    const TARGET_SHEET_NAME = "OT_Data";
-
-    // Helper to build CSV URL using Google Visualization API (GViz)
-    function buildGoogleSheetCsvUrl(sheetIdOrUrl, tabName = "OT_Data") {
-      let sheetId = (sheetIdOrUrl || TARGET_SPREADSHEET_ID).trim();
-      
-      // If user provided a full Google Sheet URL, extract the ID
-      const match = sheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-      if (match && match[1]) {
-        sheetId = match[1];
-      }
-
-      const encodedTab = encodeURIComponent(tabName || TARGET_SHEET_NAME);
-      // GViz CSV export endpoint
-      return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodedTab}`;
-    }
-
-    // Default sample OT_Data reflecting authentic Thai Hospital/Lasik center operations
-    // Contains rows with Status: Approved, Pending, Rejected to demonstrate strict Approved-only filtering
-    const DEFAULT_LASIK_OT_DATA = [
-      { ID: "OT-2026-001", Date: "2026-01-05", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "Femto-LASIK", Units: 3, CalculatedPrice: 4500, Status: "Approved", Note: "เคสเช้าวันเสาร์" },
-      { ID: "OT-2026-002", Date: "2026-01-06", Month: "2026-01", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ReLEx SMILE", Units: 4, CalculatedPrice: 8000, Status: "Approved", Note: "เคสช่วงเย็น" },
-      { ID: "OT-2026-003", Date: "2026-01-08", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา (OR Nurse)", OT_Type: "Femto-LASIK", Units: 5, CalculatedPrice: 3500, Status: "Approved", Note: "ช่วยผ่าตัด" },
-      { ID: "OT-2026-004", Date: "2026-01-10", Month: "2026-01", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "PRK", Units: 2, CalculatedPrice: 2600, Status: "Approved", Note: "เคสพิเศษ" },
-      { ID: "OT-2026-005", Date: "2026-01-12", Month: "2026-01", Center: "ศูนย์เลสิก พัทยา", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2400, Status: "Approved", Note: "สแตนด์บายวันอาทิตย์" },
-      { ID: "OT-2026-006", Date: "2026-01-15", Month: "2026-01", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 6000, Status: "Pending", Note: "รออนุมัติหัวหน้าแผนก" },
-      { ID: "OT-2026-007", Date: "2026-01-18", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "ดร. อภิสิทธิ์ (นักทัศนมาตร)", OT_Type: "Refraction & Screening", Units: 6, CalculatedPrice: 3000, Status: "Approved", Note: "ตรวจค่าสายตาก่อนทำเลสิก" },
-      { ID: "OT-2026-008", Date: "2026-01-20", Month: "2026-01", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "พว. กัลยา", OT_Type: "ReLEx SMILE", Units: 3, CalculatedPrice: 4200, Status: "Approved", Note: "เคส SMILE Pro" },
-      
-      { ID: "OT-2026-009", Date: "2026-02-03", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 5, CalculatedPrice: 10000, Status: "Approved", Note: "เคสเสาร์บ่าย" },
-      { ID: "OT-2026-010", Date: "2026-02-05", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. วรวัฒน์", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", Note: "ผ่าตัดเลสิกไร้ใบมีด" },
-      { ID: "OT-2026-011", Date: "2026-02-07", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "พว. จุฑามาศ", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2800, Status: "Approved", Note: "เวรวันหยุด" },
-      { ID: "OT-2026-012", Date: "2026-02-10", Month: "2026-02", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "พญ. มนัสนันท์", OT_Type: "PRK", Units: 4, CalculatedPrice: 5200, Status: "Approved", Note: "เคส PRK ราชการ" },
-      { ID: "OT-2026-013", Date: "2026-02-14", Month: "2026-02", Center: "ศูนย์เลสิก พัทยา", StaffName: "นพ. สิทธิพร", OT_Type: "Femto-LASIK", Units: 3, CalculatedPrice: 4500, Status: "Approved", Note: "เคสนักท่องเที่ยวต่างชาติ" },
-      { ID: "OT-2026-014", Date: "2026-02-18", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 5000, Status: "Approved", Note: "เคสใส่เลนส์เสริม" },
-      { ID: "OT-2026-015", Date: "2026-02-22", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. เอกชัย", OT_Type: "Femto-LASIK", Units: 2, CalculatedPrice: 3000, Status: "Rejected", Note: "เอกสารข้อมูลไม่ครบ" },
-      
-      { ID: "OT-2026-016", Date: "2026-03-02", Month: "2026-03", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 6, CalculatedPrice: 12000, Status: "Approved", Note: "เคส SMILE เพิ่มเติม" },
-      { ID: "OT-2026-017", Date: "2026-03-04", Month: "2026-03", Center: "ศูนย์เลสิก พระราม 9", StaffName: "พว. ศิริพร", OT_Type: "Refraction & Screening", Units: 7, CalculatedPrice: 3500, Status: "Approved", Note: "ตรวจสายตาวันหยุด" },
-      { ID: "OT-2026-018", Date: "2026-03-06", Month: "2026-03", Center: "ศูนย์เลสิก พัทยา", StaffName: "นพ. สิทธิพร", OT_Type: "ReLEx SMILE", Units: 3, CalculatedPrice: 6000, Status: "Approved", Note: "เคสช่วงเช้า" },
-      { ID: "OT-2026-019", Date: "2026-03-08", Month: "2026-03", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", Note: "เคสมาตรฐาน" },
-      { ID: "OT-2026-020", Date: "2026-03-10", Month: "2026-03", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. รุ่งนภา", OT_Type: "On-Call / Standby", Units: 6, CalculatedPrice: 2100, Status: "Approved", Note: "เวรฉุกเฉิน" },
-      { ID: "OT-2026-021", Date: "2026-03-12", Month: "2026-03", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 3, CalculatedPrice: 9000, Status: "Approved", Note: "เคส ICL Toric" }
+    // Immediate Initial Dataset (Authentic OT Lasik structure)
+    // Ensures the UI opens INSTANTLY without freezing or showing endless spinner
+    const SEED_DATASET = [
+      { ID: "OT-001", Date: "2026-01-05", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", Note: "เคสเหมาจ่ายเช้า" },
+      { ID: "OT-002", Date: "2026-01-08", Month: "2026-01", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ReLEx SMILE", Units: 5, CalculatedPrice: 10000, Status: "Approved", Note: "เคสช่วงเย็น" },
+      { ID: "OT-003", Date: "2026-01-12", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา (OR Nurse)", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 2800, Status: "Approved", Note: "ช่วยผ่าตัด" },
+      { ID: "OT-004", Date: "2026-01-15", Month: "2026-01", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "PRK", Units: 3, CalculatedPrice: 3900, Status: "Approved", Note: "เคสตรวจพิเศษ" },
+      { ID: "OT-005", Date: "2026-01-20", Month: "2026-01", Center: "ศูนย์เลสิก พัทยา", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2400, Status: "Approved", Note: "เวรวันอาทิตย์" },
+      { ID: "OT-006", Date: "2026-01-22", Month: "2026-01", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 6000, Status: "Pending", Note: "รอเอกสารเพิ่มเติม" },
+      { ID: "OT-007", Date: "2026-02-02", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 6, CalculatedPrice: 12000, Status: "Approved", Note: "SMILE Pro เคสเช้า" },
+      { ID: "OT-008", Date: "2026-02-06", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. วรวัฒน์", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", Note: "เคสมาตรฐาน" },
+      { ID: "OT-009", Date: "2026-02-10", Month: "2026-02", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "พญ. มนัสนันท์", OT_Type: "PRK", Units: 4, CalculatedPrice: 5200, Status: "Approved", Note: "เคสราชการ" },
+      { ID: "OT-010", Date: "2026-02-14", Month: "2026-02", Center: "ศูนย์เลสิก พัทยา", StaffName: "นพ. สิทธิพร", OT_Type: "Femto-LASIK", Units: 3, CalculatedPrice: 4500, Status: "Approved", Note: "เคสนักท่องเที่ยว" },
+      { ID: "OT-011", Date: "2026-02-18", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 5000, Status: "Approved", Note: "เคสใส่เลนส์เสริม" },
+      { ID: "OT-012", Date: "2026-02-20", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "ดร. อภิสิทธิ์ (นักทัศนมาตร)", OT_Type: "Refraction & Screening", Units: 8, CalculatedPrice: 4000, Status: "Approved", Note: "วัดค่าสายตาละเอียด" },
+      { ID: "OT-013", Date: "2026-02-25", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "นพ. เอกชัย", OT_Type: "Femto-LASIK", Units: 2, CalculatedPrice: 3000, Status: "Rejected", Note: "ข้อมูลซ้ำซ้อน" },
+      { ID: "OT-014", Date: "2026-03-02", Month: "2026-03", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 7, CalculatedPrice: 14000, Status: "Approved", Note: "วันหยุดนักขัตฤกษ์" },
+      { ID: "OT-015", Date: "2026-03-05", Month: "2026-03", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 3, CalculatedPrice: 9000, Status: "Approved", Note: "ICL Toric" },
+      { ID: "OT-016", Date: "2026-03-08", Month: "2026-03", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "Femto-LASIK", Units: 5, CalculatedPrice: 7500, Status: "Approved", Note: "เคสช่วงบ่าย" },
+      { ID: "OT-017", Date: "2026-03-12", Month: "2026-03", Center: "ศูนย์เลสิก พัทยา", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2400, Status: "Approved", Note: "เวรฉุกเฉิน" }
     ];
 
-    // Helper to format currency in Thai Baht format
-    function formatTHB(val) {
-      const num = Number(val) || 0;
+    // Global Reactive States
+    let masterDataset = [...SEED_DATASET];
+    let approvedRecords = [];
+    let filteredRecords = [];
+    let isDetailedMatrix = false;
+    let autoRefreshTimer = null;
+    let trendChartInstance = null;
+    let doughnutChartInstance = null;
+
+    function formatTHB(amount) {
+      const num = Number(amount) || 0;
       return '฿' + num.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
 
-    // Parse CSV Text into JSON Objects
-    function parseCSV(text) {
-      const lines = text.trim().split(/\r\n|\n/);
-      if (lines.length < 2) return [];
-
-      // Split header by comma taking care of quotes
-      const parseLine = (line) => {
-        const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
-        const matches = [];
-        let match;
-        while ((match = regex.exec(line))) {
-          let val = match[1] || '';
-          if (val.startsWith('"') && val.endsWith('"')) {
-            val = val.slice(1, -1).replace(/""/g, '"');
-          }
-          matches.push(val.trim());
-          if (regex.lastIndex >= line.length) break;
-        }
-        return matches;
-      };
-
-      const headers = parseLine(lines[0]);
-      
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const values = parseLine(lines[i]);
-        const obj = {};
-        headers.forEach((h, index) => {
-          obj[h] = values[index] !== undefined ? values[index] : '';
-        });
-        rows.push(obj);
-      }
-      return rows;
-    }
-
-    // Normalize raw sheet data so it aligns seamlessly with our standard model
-    function normalizeData(data) {
-      return data.map((item, idx) => {
-        // Detect Center
-        const center = item.Center || item.center || item.Branch || item['ศูนย์'] || item['สาขา'] || item['ศูนย์เลสิก'] || 'ไม่ระบุศูนย์';
-        
-        // Detect OT_Type
-        const otType = item.OT_Type || item.ot_type || item.OtType || item.Procedure || item['ประเภทOT'] || item['ประเภท'] || 'General OT';
-        
-        // Detect Status (Support both English 'Approved' and Thai 'อนุมัติ')
-        const status = (item.Status || item.status || item['สถานะ'] || 'Pending').trim();
-        
-        // Detect CalculatedPrice (remove comma, currency symbols, parse to float)
-        let rawPrice = item.CalculatedPrice ?? item.calculated_price ?? item.TotalPrice ?? item.Price ?? item['ยอดเงิน'] ?? item['ค่าตอบแทน'] ?? item['ยอดรวม'] ?? 0;
-        if (typeof rawPrice === 'string') {
-          rawPrice = parseFloat(rawPrice.replace(/[^0-9.-]+/g, '')) || 0;
-        }
-
-        // If CalculatedPrice is 0 but Rate and Units exist, calculate product
-        if (!rawPrice) {
-          const rate = parseFloat(item.Rate || item.PricePerUnit || item['อัตรา'] || 0) || 0;
-          const units = parseFloat(item.Units || item.Cases || item.Hours || item['จำนวน'] || item['จำนวนเคส'] || 0) || 0;
-          if (rate > 0 && units > 0) {
-            rawPrice = rate * units;
-          }
-        }
-
-        // Detect Date / Month
-        const dateStr = item.Date || item.WorkDate || item['วันที่'] || new Date().toISOString().slice(0, 10);
-        let month = item.Month || item['เดือน'];
-        if (!month && dateStr) {
-          month = dateStr.slice(0, 7); // Extract YYYY-MM
-        }
-
-        return {
-          ID: item.ID || item.id || item.OT_ID || `OT-${idx + 1}`,
-          Date: dateStr,
-          Month: month || '2026-01',
-          Center: center.trim(),
-          StaffName: item.StaffName || item.Doctor || item.Nurse || item.Staff || item['ชื่อ'] || item['ผู้ปฏิบัติงาน'] || 'บุคลากร',
-          OT_Type: otType.trim(),
-          Units: parseFloat(item.Units || item.Cases || item.Hours || item['จำนวน'] || 1) || 1,
-          CalculatedPrice: Number(rawPrice) || 0,
-          Status: status,
-          Note: item.Note || item.Remarks || item['หมายเหตุ'] || ''
-        };
-      });
-    }
-
-    function processAndFilterData() {
-      // MANDATORY CRITERIA:
-      // ดึงข้อมูลเฉพาะ Approved ของคอลัม Status เท่านั้น (รองรับทั้ง Approved, approved, อนุมัติ, อนุมัติแล้ว)
-      approvedDataset = rawDataset.filter(item => {
-        if (!item.Status) return false;
-        const s = item.Status.toLowerCase().trim();
-        return s === 'approved' || s === 'อนุมัติ' || s === 'อนุมัติแล้ว';
-      });
-
-      // Populate filter dropdowns dynamically based on approved data
-      populateFilterOptions();
-
-      // Apply User Selection Filters (Center, Month, OT_Type, Search)
-      applyFilters();
-    }
-
-    function populateFilterOptions() {
-      const centerSelect = document.getElementById('filterCenter');
-      const monthSelect = document.getElementById('filterMonth');
-      const otTypeSelect = document.getElementById('filterOtType');
-
-      const currentCenter = centerSelect.value;
-      const currentMonth = monthSelect.value;
-      const currentOtType = otTypeSelect.value;
-
-      // Extract unique values
-      const centers = [...new Set(approvedDataset.map(d => d.Center))].sort();
-      const months = [...new Set(approvedDataset.map(d => d.Month))].sort();
-      const otTypes = [...new Set(approvedDataset.map(d => d.OT_Type))].sort();
-
-      // Reset and fill
-      centerSelect.innerHTML = '<option value="ALL">ทุกศูนย์บริการ (All Centers)</option>';
-      centers.forEach(c => {
-        centerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
-      });
-      if (centers.includes(currentCenter)) centerSelect.value = currentCenter;
-
-      monthSelect.innerHTML = '<option value="ALL">ทุกเดือน (All Months)</option>';
-      months.forEach(m => {
-        monthSelect.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(formatMonthName(m))}</option>`;
-      });
-      if (months.includes(currentMonth)) monthSelect.value = currentMonth;
-
-      otTypeSelect.innerHTML = '<option value="ALL">ทุกประเภท (All OT Types)</option>';
-      otTypes.forEach(t => {
-        otTypeSelect.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`;
-      });
-      if (otTypes.includes(currentOtType)) otTypeSelect.value = currentOtType;
-    }
-
-    function formatMonthName(monthStr) {
+    function formatMonthTh(monthStr) {
       if (!monthStr || monthStr === 'ALL') return monthStr;
       const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
       const parts = monthStr.split('-');
@@ -698,29 +561,130 @@
       return monthStr;
     }
 
-    function applyFilters() {
-      const selectedCenter = document.getElementById('filterCenter').value;
-      const selectedMonth = document.getElementById('filterMonth').value;
-      const selectedOtType = document.getElementById('filterOtType').value;
-      const keyword = (document.getElementById('filterKeyword').value || '').trim().toLowerCase();
+    function sanitizeText(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
-      filteredDataset = approvedDataset.filter(item => {
-        if (selectedCenter !== 'ALL' && item.Center !== selectedCenter) return false;
-        if (selectedMonth !== 'ALL' && item.Month !== selectedMonth) return false;
-        if (selectedOtType !== 'ALL' && item.OT_Type !== selectedOtType) return false;
-        if (keyword) {
-          const matchStaff = item.StaffName.toLowerCase().includes(keyword);
-          const matchNote = item.Note.toLowerCase().includes(keyword);
-          const matchId = item.ID.toLowerCase().includes(keyword);
+    // Standardize heterogeneous sheet column names
+    function normalizeRecords(rows) {
+      return rows.map((r, i) => {
+        // Status resolution (Supports English 'Approved' and Thai 'อนุมัติ')
+        const status = (r.Status || r.status || r['สถานะ'] || 'Pending').toString().trim();
+
+        // Center / Branch
+        const center = (r.Center || r.center || r.Branch || r['ศูนย์'] || r['สาขา'] || r['ศูนย์เลสิก'] || 'ไม่ระบุศูนย์').toString().trim();
+
+        // OT_Type
+        const otType = (r.OT_Type || r.ot_type || r.OtType || r.Procedure || r['ประเภทOT'] || r['ประเภท'] || 'General OT').toString().trim();
+
+        // CalculatedPrice resolution
+        let price = r.CalculatedPrice ?? r.calculated_price ?? r.TotalPrice ?? r.Price ?? r['ยอดเงิน'] ?? r['ค่าตอบแทน'] ?? r['ยอดรวม'] ?? 0;
+        if (typeof price === 'string') {
+          price = parseFloat(price.replace(/[^0-9.-]+/g, '')) || 0;
+        }
+
+        // Calculate if units & rate exist but calculatedPrice is empty
+        if (!price) {
+          const rate = parseFloat(r.Rate || r.PricePerUnit || r['อัตรา'] || 0) || 0;
+          const units = parseFloat(r.Units || r.Cases || r.Hours || r['จำนวน'] || 0) || 0;
+          if (rate > 0 && units > 0) price = rate * units;
+        }
+
+        // Date and Month
+        const dateStr = (r.Date || r.WorkDate || r['วันที่'] || new Date().toISOString().slice(0, 10)).toString();
+        let month = (r.Month || r['เดือน'] || '').toString().trim();
+        if (!month && dateStr) {
+          month = dateStr.slice(0, 7);
+        }
+
+        return {
+          ID: r.ID || r.id || `OT-${i + 1}`,
+          Date: dateStr,
+          Month: month || '2026-01',
+          Center: center,
+          StaffName: (r.StaffName || r.Doctor || r.Nurse || r.Staff || r['ชื่อ'] || r['ผู้ปฏิบัติงาน'] || 'บุคลากร').toString().trim(),
+          OT_Type: otType,
+          Units: parseFloat(r.Units || r.Cases || r.Hours || r['จำนวน'] || 1) || 1,
+          CalculatedPrice: Number(price) || 0,
+          Status: status,
+          Note: (r.Note || r.Remarks || r['หมายเหตุ'] || '').toString().trim()
+        };
+      });
+    }
+
+    function processApprovedData() {
+      // MANDATORY CRITERIA:
+      // ดึงข้อมูลเฉพาะ Approved ของคอลัม Status เท่านั้น
+      approvedRecords = masterDataset.filter(row => {
+        if (!row.Status) return false;
+        const s = row.Status.toLowerCase().trim();
+        return s === 'approved' || s === 'อนุมัติ' || s === 'อนุมัติแล้ว';
+      });
+
+      populateFilterSelects();
+      applyFilters();
+    }
+
+    function populateFilterSelects() {
+      const centerSelect = document.getElementById('filterCenter');
+      const monthSelect = document.getElementById('filterMonth');
+      const otTypeSelect = document.getElementById('filterOtType');
+
+      const curCenter = centerSelect.value;
+      const curMonth = monthSelect.value;
+      const curOtType = otTypeSelect.value;
+
+      const centers = [...new Set(approvedRecords.map(d => d.Center))].sort();
+      const months = [...new Set(approvedRecords.map(d => d.Month))].sort();
+      const otTypes = [...new Set(approvedRecords.map(d => d.OT_Type))].sort();
+
+      centerSelect.innerHTML = '<option value="ALL">ทุกศูนย์บริการ (All Centers)</option>';
+      centers.forEach(c => {
+        centerSelect.innerHTML += `<option value="${sanitizeText(c)}">${sanitizeText(c)}</option>`;
+      });
+      if (centers.includes(curCenter)) centerSelect.value = curCenter;
+
+      monthSelect.innerHTML = '<option value="ALL">ทุกเดือน (All Months)</option>';
+      months.forEach(m => {
+        monthSelect.innerHTML += `<option value="${sanitizeText(m)}">${sanitizeText(formatMonthTh(m))}</option>`;
+      });
+      if (months.includes(curMonth)) monthSelect.value = curMonth;
+
+      otTypeSelect.innerHTML = '<option value="ALL">ทุกประเภทหัตถการ (All Types)</option>';
+      otTypes.forEach(t => {
+        otTypeSelect.innerHTML += `<option value="${sanitizeText(t)}">${sanitizeText(t)}</option>`;
+      });
+      if (otTypes.includes(curOtType)) otTypeSelect.value = curOtType;
+    }
+
+    function applyFilters() {
+      const center = document.getElementById('filterCenter').value;
+      const month = document.getElementById('filterMonth').value;
+      const otType = document.getElementById('filterOtType').value;
+      const q = (document.getElementById('filterKeyword').value || '').trim().toLowerCase();
+
+      filteredRecords = approvedRecords.filter(row => {
+        if (center !== 'ALL' && row.Center !== center) return false;
+        if (month !== 'ALL' && row.Month !== month) return false;
+        if (otType !== 'ALL' && row.OT_Type !== otType) return false;
+        if (q) {
+          const matchStaff = row.StaffName.toLowerCase().includes(q);
+          const matchNote = row.Note.toLowerCase().includes(q);
+          const matchId = row.ID.toLowerCase().includes(q);
           if (!matchStaff && !matchNote && !matchId) return false;
         }
         return true;
       });
 
-      // Update UI components
       renderKPIs();
-      renderCharts();
       renderMatrixTable();
+      renderCharts();
       renderRawTable();
     }
 
@@ -730,83 +694,87 @@
       document.getElementById('filterOtType').value = 'ALL';
       document.getElementById('filterKeyword').value = '';
       applyFilters();
-      showToast('ล้างตัวกรองทั้งหมดเรียบร้อย', 'info');
+      showToastNotification('ล้างตัวกรองข้อมูลเรียบร้อย', 'info');
     }
 
     function renderKPIs() {
-      const totalAmount = filteredDataset.reduce((sum, row) => sum + (row.CalculatedPrice || 0), 0);
-      const totalCases = filteredDataset.length;
-      const avgPerCase = totalCases > 0 ? (totalAmount / totalCases) : 0;
+      const totalAmount = filteredRecords.reduce((sum, r) => sum + r.CalculatedPrice, 0);
+      const totalCases = filteredRecords.length;
+      const avg = totalCases > 0 ? totalAmount / totalCases : 0;
 
       document.getElementById('kpiTotalApproved').innerText = formatTHB(totalAmount);
-      document.getElementById('kpiTotalCases').innerText = totalCases.toLocaleString();
-      document.getElementById('kpiAveragePerCase').innerText = `เฉลี่ย ${formatTHB(avgPerCase)} / รายการ`;
+      document.getElementById('kpiTotalCases').innerText = totalCases.toLocaleString('th-TH');
+      document.getElementById('kpiAveragePerCase').innerText = `เฉลี่ย ${formatTHB(avg)} / รายการ`;
 
-      // Calculate Top Center
+      // Top Center
       const centerTotals = {};
-      filteredDataset.forEach(row => {
-        centerTotals[row.Center] = (centerTotals[row.Center] || 0) + row.CalculatedPrice;
+      filteredRecords.forEach(r => {
+        centerTotals[r.Center] = (centerTotals[r.Center] || 0) + r.CalculatedPrice;
       });
-      let topCenterName = '-';
-      let topCenterVal = 0;
-      Object.entries(centerTotals).forEach(([center, val]) => {
-        if (val > topCenterVal) {
-          topCenterVal = val;
-          topCenterName = center;
+      let topC = '-';
+      let topCVal = 0;
+      Object.entries(centerTotals).forEach(([c, val]) => {
+        if (val > topCVal) {
+          topCVal = val;
+          topC = c;
         }
       });
-      const topCenterPct = totalAmount > 0 ? ((topCenterVal / totalAmount) * 100).toFixed(1) : 0;
-      document.getElementById('kpiTopCenter').innerText = topCenterName;
-      document.getElementById('kpiTopCenterAmount').innerText = `${formatTHB(topCenterVal)} (${topCenterPct}%)`;
+      const topCPct = totalAmount > 0 ? ((topCVal / totalAmount) * 100).toFixed(1) : 0;
+      document.getElementById('kpiTopCenter').innerText = topC;
+      document.getElementById('kpiTopCenterAmount').innerText = `${formatTHB(topCVal)} (${topCPct}% ของยอดรวม)`;
 
-      // Calculate Top OT Type
+      // Top OT Type
       const typeTotals = {};
-      filteredDataset.forEach(row => {
-        typeTotals[row.OT_Type] = (typeTotals[row.OT_Type] || 0) + row.CalculatedPrice;
+      filteredRecords.forEach(r => {
+        typeTotals[r.OT_Type] = (typeTotals[r.OT_Type] || 0) + r.CalculatedPrice;
       });
-      let topTypeName = '-';
-      let topTypeVal = 0;
-      Object.entries(typeTotals).forEach(([type, val]) => {
-        if (val > topTypeVal) {
-          topTypeVal = val;
-          topTypeName = type;
+      let topT = '-';
+      let topTVal = 0;
+      Object.entries(typeTotals).forEach(([t, val]) => {
+        if (val > topTVal) {
+          topTVal = val;
+          topT = t;
         }
       });
-      document.getElementById('kpiTopOtType').innerText = topTypeName;
-      document.getElementById('kpiTopOtTypeAmount').innerText = formatTHB(topTypeVal);
+      document.getElementById('kpiTopOtType').innerText = topT;
+      document.getElementById('kpiTopOtTypeAmount').innerText = formatTHB(topTVal);
     }
 
     function renderMatrixTable() {
-      const tbody = document.getElementById('matrixTableBody');
-      const countEl = document.getElementById('matrixRecordCount');
-      countEl.innerText = `อนุมัติแล้ว ${filteredDataset.length} รายการ (จากทั้งหมด ${rawDataset.length} แถวใน OT_Data)`;
+      const thead = document.getElementById('matrixHead');
+      const tbody = document.getElementById('matrixBody');
+      const tfoot = document.getElementById('matrixFoot');
+      const stats = document.getElementById('matrixRecordStats');
 
-      if (filteredDataset.length === 0) {
+      stats.innerText = `อนุมัติแล้ว ${filteredRecords.length.toLocaleString('th-TH')} รายการ (จากข้อมูลทั้งหมด ${masterDataset.length} รายการ)`;
+
+      if (filteredRecords.length === 0) {
+        thead.innerHTML = '';
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" class="p-8 text-center text-slate-400">
-              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-60"></i>
-              <p>ไม่พบข้อมูลรายการ Approved ตามเงื่อนไขตัวกรอง</p>
+            <td colspan="10" class="p-10 text-center text-slate-400">
+              <i data-lucide="filter-x" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+              <p class="font-medium text-slate-500">ไม่พบรายการ Approved ตามตัวกรองที่เลือก</p>
             </td>
           </tr>
         `;
+        tfoot.innerHTML = '';
         lucide.createIcons();
         return;
       }
 
-      // Unique distinct Centers, Months, and OT_Types present in filtered dataset
-      const centers = [...new Set(filteredDataset.map(d => d.Center))].sort();
-      const months = [...new Set(filteredDataset.map(d => d.Month))].sort();
-      const otTypes = [...new Set(filteredDataset.map(d => d.OT_Type))].sort();
+      const centers = [...new Set(filteredRecords.map(d => d.Center))].sort();
+      const months = [...new Set(filteredRecords.map(d => d.Month))].sort();
+      const otTypes = [...new Set(filteredRecords.map(d => d.OT_Type))].sort();
 
-      // Aggregate Map: matrix[center][month][otType] = sum(CalculatedPrice)
+      // Multi-dimensional aggregations
       const matrix = {};
-      const centerMonthSubtotals = {}; // [center][month]
-      const centerGrandTotals = {};    // [center]
-      const monthGrandTotals = {};     // [month]
-      let overallTotal = 0;
+      const centerMonthSums = {};
+      const centerTotals = {};
+      const monthTotals = {};
+      let grandTotal = 0;
 
-      filteredDataset.forEach(row => {
+      filteredRecords.forEach(row => {
         const c = row.Center;
         const m = row.Month;
         const t = row.OT_Type;
@@ -816,165 +784,266 @@
         if (!matrix[c][m]) matrix[c][m] = {};
         matrix[c][m][t] = (matrix[c][m][t] || 0) + p;
 
-        if (!centerMonthSubtotals[c]) centerMonthSubtotals[c] = {};
-        centerMonthSubtotals[c][m] = (centerMonthSubtotals[c][m] || 0) + p;
+        if (!centerMonthSums[c]) centerMonthSums[c] = {};
+        centerMonthSums[c][m] = (centerMonthSums[c][m] || 0) + p;
 
-        centerGrandTotals[c] = (centerGrandTotals[c] || 0) + p;
-        monthGrandTotals[m] = (monthGrandTotals[m] || 0) + p;
-        overallTotal += p;
+        centerTotals[c] = (centerTotals[c] || 0) + p;
+        monthTotals[m] = (monthTotals[m] || 0) + p;
+        grandTotal += p;
       });
 
-      // Build Table HTML Header
-      let html = '<thead class="bg-slate-100 text-slate-700 text-xs font-semibold border-b border-slate-200"><tr>';
-      html += '<th class="py-3 px-4 sticky left-0 bg-slate-100 z-10">ศูนย์บริการ (Center)</th>';
-      
-      if (showDetailedMatrix) {
-        html += '<th class="py-3 px-3 bg-slate-100">ประเภท OT</th>';
+      // Thead
+      let headHtml = `<tr><th class="py-3.5 px-4 sticky left-0 bg-slate-50 z-20 border-r border-slate-200/80 font-bold text-slate-800">ศูนย์บริการ (Center)</th>`;
+      if (isDetailedMatrix) {
+        headHtml += `<th class="py-3.5 px-3 bg-slate-50 font-bold text-slate-800 border-r border-slate-200/80">ประเภท OT (OT_Type)</th>`;
       }
-
       months.forEach(m => {
-        html += `<th class="py-3 px-4 text-right whitespace-nowrap">${escapeHtml(formatMonthName(m))}</th>`;
+        headHtml += `<th class="py-3.5 px-4 text-right whitespace-nowrap font-bold text-slate-800">${sanitizeText(formatMonthTh(m))}</th>`;
       });
-      html += '<th class="py-3 px-4 text-right bg-slate-200/70 font-bold text-slate-800">รวมสุทธิ (Grand Total)</th>';
-      html += '</tr></thead><tbody class="divide-y divide-slate-100">';
+      headHtml += `<th class="py-3.5 px-4 text-right bg-slate-100 font-extrabold text-teal-900">รวมสุทธิ (Grand Total)</th></tr>`;
+      thead.innerHTML = headHtml;
 
-      // Build Table Body
+      // Tbody
+      let bodyHtml = '';
       centers.forEach(c => {
-        if (!showDetailedMatrix) {
-          // COMPACT VIEW: One row per Center, showing total per month
-          html += `<tr class="hover:bg-cyan-50/40 transition">`;
-          html += `<td class="py-3.5 px-4 font-semibold text-slate-800 sticky left-0 bg-white">
-                    <div class="flex items-center gap-2">
-                      <i data-lucide="building-2" class="w-4 h-4 text-cyan-600"></i>
-                      <span>${escapeHtml(c)}</span>
-                    </div>
-                   </td>`;
-
+        if (!isDetailedMatrix) {
+          // COMPACT VIEW: Center x Month
+          bodyHtml += `<tr class="hover:bg-teal-50/40 transition">`;
+          bodyHtml += `<td class="py-3.5 px-4 font-semibold text-slate-900 sticky left-0 bg-white border-r border-slate-100">
+                        <div class="flex items-center gap-2">
+                          <i data-lucide="building" class="w-4 h-4 text-teal-600"></i>
+                          <span>${sanitizeText(c)}</span>
+                        </div>
+                       </td>`;
           months.forEach(m => {
-            const val = (centerMonthSubtotals[c] && centerMonthSubtotals[c][m]) || 0;
-            html += `<td class="py-3.5 px-4 text-right font-medium ${val > 0 ? 'text-slate-800' : 'text-slate-300'}">
-                      ${val > 0 ? formatTHB(val) : '-'}
-                     </td>`;
+            const val = (centerMonthSums[c] && centerMonthSums[c][m]) || 0;
+            bodyHtml += `<td class="py-3.5 px-4 text-right font-medium ${val > 0 ? 'text-slate-800' : 'text-slate-300'}">
+                          ${val > 0 ? formatTHB(val) : '-'}
+                         </td>`;
           });
-
-          const cTotal = centerGrandTotals[c] || 0;
-          html += `<td class="py-3.5 px-4 text-right font-bold text-cyan-900 bg-slate-50/70">${formatTHB(cTotal)}</td>`;
-          html += `</tr>`;
+          bodyHtml += `<td class="py-3.5 px-4 text-right font-bold text-teal-900 bg-teal-50/40">${formatTHB(centerTotals[c] || 0)}</td>`;
+          bodyHtml += `</tr>`;
         } else {
-          // DETAILED VIEW: Grouped by Center, with nested rows for each OT_Type
-          const centerTypes = otTypes.filter(t => {
-            return months.some(m => matrix[c] && matrix[c][m] && matrix[c][m][t]);
-          });
-
+          // DETAILED VIEW: Center with nested OT_Type rows
+          const centerTypes = otTypes.filter(t => months.some(m => matrix[c] && matrix[c][m] && matrix[c][m][t]));
           if (centerTypes.length === 0) return;
 
           centerTypes.forEach((t, idx) => {
-            html += `<tr class="hover:bg-cyan-50/30 transition text-xs sm:text-sm">`;
+            bodyHtml += `<tr class="hover:bg-slate-50 transition">`;
             if (idx === 0) {
-              html += `<td rowspan="${centerTypes.length + 1}" class="py-3 px-4 font-bold text-slate-900 sticky left-0 bg-slate-50 border-r border-slate-200 align-top">
-                        <div class="flex items-center gap-1.5 sticky top-12">
-                          <i data-lucide="building-2" class="w-4 h-4 text-cyan-600"></i>
-                          <span>${escapeHtml(c)}</span>
-                        </div>
-                       </td>`;
+              bodyHtml += `<td rowspan="${centerTypes.length + 1}" class="py-3.5 px-4 font-bold text-slate-900 sticky left-0 bg-slate-50/80 border-r border-slate-200 align-top">
+                            <div class="sticky top-20 flex items-center gap-2">
+                              <i data-lucide="building" class="w-4 h-4 text-teal-600"></i>
+                              <span>${sanitizeText(c)}</span>
+                            </div>
+                           </td>`;
             }
-            html += `<td class="py-2.5 px-3 text-slate-600 border-r border-slate-100 font-medium">
-                      <span class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-500 mr-1.5"></span>
-                      ${escapeHtml(t)}
-                     </td>`;
-
-            let rowTypeTotal = 0;
+            bodyHtml += `<td class="py-2.5 px-3 text-slate-700 border-r border-slate-100 font-medium">
+                          <span class="inline-block w-1.5 h-1.5 rounded-full bg-teal-500 mr-2"></span>
+                          ${sanitizeText(t)}
+                         </td>`;
+            let typeRowSum = 0;
             months.forEach(m => {
               const val = (matrix[c] && matrix[c][m] && matrix[c][m][t]) || 0;
-              rowTypeTotal += val;
-              html += `<td class="py-2.5 px-4 text-right ${val > 0 ? 'text-slate-800' : 'text-slate-300'}">
-                        ${val > 0 ? formatTHB(val) : '-'}
-                       </td>`;
+              typeRowSum += val;
+              bodyHtml += `<td class="py-2.5 px-4 text-right ${val > 0 ? 'text-slate-800 font-medium' : 'text-slate-300'}">
+                            ${val > 0 ? formatTHB(val) : '-'}
+                           </td>`;
             });
-            html += `<td class="py-2.5 px-4 text-right font-semibold text-slate-800 bg-slate-50/50">${formatTHB(rowTypeTotal)}</td>`;
-            html += `</tr>`;
+            bodyHtml += `<td class="py-2.5 px-4 text-right font-semibold text-slate-800 bg-slate-50/60">${formatTHB(typeRowSum)}</td>`;
+            bodyHtml += `</tr>`;
           });
 
-          // Subtotal Row for this center
-          html += `<tr class="bg-cyan-50/60 font-semibold border-b-2 border-slate-200 text-xs sm:text-sm">`;
-          html += `<td class="py-2 px-3 text-cyan-900 font-bold border-r border-slate-200">รวมศูนย์ ${escapeHtml(c)}</td>`;
+          // Center Subtotal
+          bodyHtml += `<tr class="bg-teal-50/50 font-semibold border-b-2 border-slate-200">`;
+          bodyHtml += `<td class="py-2.5 px-3 text-teal-900 font-bold border-r border-slate-200">รวมศูนย์ ${sanitizeText(c)}</td>`;
           months.forEach(m => {
-            const sub = (centerMonthSubtotals[c] && centerMonthSubtotals[c][m]) || 0;
-            html += `<td class="py-2 px-4 text-right font-bold text-cyan-900">${formatTHB(sub)}</td>`;
+            const sub = (centerMonthSums[c] && centerMonthSums[c][m]) || 0;
+            bodyHtml += `<td class="py-2.5 px-4 text-right font-bold text-teal-900">${formatTHB(sub)}</td>`;
           });
-          html += `<td class="py-2 px-4 text-right font-bold text-cyan-950 bg-cyan-100/50">${formatTHB(centerGrandTotals[c] || 0)}</td>`;
-          html += `</tr>`;
+          bodyHtml += `<td class="py-2.5 px-4 text-right font-extrabold text-teal-950 bg-teal-100/60">${formatTHB(centerTotals[c] || 0)}</td>`;
+          bodyHtml += `</tr>`;
         }
       });
+      tbody.innerHTML = bodyHtml;
 
-      // Grand Total Footer Row
-      html += `</tbody><tfoot class="bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-900 text-xs sm:text-sm">`;
-      html += `<tr>`;
-      html += `<td class="py-3.5 px-4 sticky left-0 bg-slate-100 text-slate-900 font-extrabold uppercase">รวมทุกศูนย์ (Grand Total)</td>`;
-      if (showDetailedMatrix) {
-        html += `<td class="py-3.5 px-3 bg-slate-100"></td>`;
+      // Tfoot Grand Total
+      let footHtml = `<tr><td class="py-3.5 px-4 sticky left-0 bg-slate-100 text-slate-900 font-bold uppercase border-r border-slate-200">รวมทุกศูนย์ (Grand Total)</td>`;
+      if (isDetailedMatrix) {
+        footHtml += `<td class="py-3.5 px-3 bg-slate-100 border-r border-slate-200"></td>`;
       }
       months.forEach(m => {
-        const mTotal = monthGrandTotals[m] || 0;
-        html += `<td class="py-3.5 px-4 text-right text-cyan-800 font-extrabold">${formatTHB(mTotal)}</td>`;
+        footHtml += `<td class="py-3.5 px-4 text-right text-teal-800 font-bold">${formatTHB(monthTotals[m] || 0)}</td>`;
       });
-      html += `<td class="py-3.5 px-4 text-right font-extrabold text-emerald-800 bg-emerald-100/70 text-sm sm:text-base">${formatTHB(overallTotal)}</td>`;
-      html += `</tr></tfoot>`;
+      footHtml += `<td class="py-3.5 px-4 text-right font-extrabold text-emerald-800 bg-emerald-100 text-sm sm:text-base">${formatTHB(grandTotal)}</td></tr>`;
+      tfoot.innerHTML = footHtml;
 
-      tbody.parentElement.innerHTML = html;
       lucide.createIcons();
     }
 
-    function toggleMatrixDetail(isDetailed) {
-      showDetailedMatrix = isDetailed;
-      document.getElementById('matrixCompactBtn').className = !isDetailed 
-        ? "px-3 py-1 rounded-md font-medium text-cyan-700 bg-cyan-50" 
-        : "px-3 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900";
-      document.getElementById('matrixDetailBtn').className = isDetailed 
-        ? "px-3 py-1 rounded-md font-medium text-cyan-700 bg-cyan-50" 
-        : "px-3 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900";
+    function toggleMatrixView(isDetailed) {
+      isDetailedMatrix = isDetailed;
+      const compactBtn = document.getElementById('matrixCompactBtn');
+      const detailBtn = document.getElementById('matrixDetailBtn');
+
+      if (!isDetailed) {
+        compactBtn.className = "px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition";
+        detailBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+      } else {
+        compactBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+        detailBtn.className = "px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition";
+      }
       renderMatrixTable();
+    }
+
+    function renderCharts() {
+      // Monthly Trend Chart
+      const trendCanvas = document.getElementById('monthlyTrendChart');
+      if (trendCanvas) {
+        const ctx = trendCanvas.getContext('2d');
+        if (trendChartInstance) trendChartInstance.destroy();
+
+        const months = [...new Set(filteredRecords.map(d => d.Month))].sort();
+        const centers = [...new Set(filteredRecords.map(d => d.Center))].sort();
+        const colors = ['#0d9488', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+        const datasets = centers.map((c, i) => {
+          const clr = colors[i % colors.length];
+          const data = months.map(m => {
+            return filteredRecords
+              .filter(r => r.Center === c && r.Month === m)
+              .reduce((sum, r) => sum + r.CalculatedPrice, 0);
+          });
+          return {
+            label: c,
+            data: data,
+            borderColor: clr,
+            backgroundColor: clr,
+            borderWidth: 2.5,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.25
+          };
+        });
+
+        trendChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: months.map(m => formatMonthTh(m)),
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: { font: { family: 'Prompt', size: 12 }, boxWidth: 12 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => ` ${ctx.dataset.label}: ${formatTHB(ctx.raw)}`
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: (val) => '฿' + (val >= 1000 ? (val / 1000) + 'k' : val)
+                },
+                grid: { color: '#f1f5f9' }
+              },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      // OT_Type Doughnut Chart
+      const pieCanvas = document.getElementById('otTypeDoughnutChart');
+      if (pieCanvas) {
+        const ctx = pieCanvas.getContext('2d');
+        if (doughnutChartInstance) doughnutChartInstance.destroy();
+
+        const typeMap = {};
+        filteredRecords.forEach(r => {
+          typeMap[r.OT_Type] = (typeMap[r.OT_Type] || 0) + r.CalculatedPrice;
+        });
+
+        const labels = Object.keys(typeMap);
+        const values = Object.values(typeMap);
+        const palette = ['#0d9488', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#64748b', '#06b6d4'];
+
+        doughnutChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: palette.slice(0, labels.length),
+              borderWidth: 3,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
+              },
+              tooltip: {
+                callbacks: {
+                  label: (c) => ` ${c.label}: ${formatTHB(c.raw)}`
+                }
+              }
+            },
+            cutout: '68%'
+          }
+        });
+      }
     }
 
     function renderRawTable() {
       const tbody = document.getElementById('rawTableBody');
-      const pageInfo = document.getElementById('tablePageInfo');
+      const counter = document.getElementById('tableRecordCount');
 
-      pageInfo.innerText = `แสดง ${filteredDataset.length.toLocaleString()} จาก ${approvedDataset.length.toLocaleString()} รายการที่อนุมัติ`;
+      counter.innerText = `แสดง ${filteredRecords.length.toLocaleString('th-TH')} จาก ${approvedRecords.length.toLocaleString('th-TH')} รายการอนุมัติ`;
 
-      if (filteredDataset.length === 0) {
+      if (filteredRecords.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="py-8 text-center text-slate-400">
-              ไม่พบข้อมูลที่ตรงกับเงื่อนไข
+              ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา
             </td>
           </tr>
         `;
         return;
       }
 
-      // Render rows (sorted by date descending)
-      const sorted = [...filteredDataset].sort((a, b) => (b.Date > a.Date ? 1 : -1));
+      const sorted = [...filteredRecords].sort((a, b) => (b.Date > a.Date ? 1 : -1));
 
       tbody.innerHTML = sorted.map(row => {
         return `
-          <tr class="hover:bg-slate-50/80 transition">
-            <td class="py-3 px-4 font-mono text-slate-600">${escapeHtml(row.Date)}</td>
-            <td class="py-3 px-4 font-medium text-slate-800">${escapeHtml(row.Center)}</td>
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-3 px-4 font-mono text-slate-600 text-xs">${sanitizeText(row.Date)}</td>
+            <td class="py-3 px-4 font-semibold text-slate-800">${sanitizeText(row.Center)}</td>
             <td class="py-3 px-4">
-              <div class="font-medium text-slate-900">${escapeHtml(row.StaffName)}</div>
-              ${row.Note ? `<div class="text-[11px] text-slate-400 truncate max-w-xs">${escapeHtml(row.Note)}</div>` : ''}
+              <div class="font-medium text-slate-900">${sanitizeText(row.StaffName)}</div>
+              ${row.Note ? `<div class="text-[11px] text-slate-400 truncate max-w-xs">${sanitizeText(row.Note)}</div>` : ''}
             </td>
             <td class="py-3 px-4">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                ${escapeHtml(row.OT_Type)}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                ${sanitizeText(row.OT_Type)}
               </span>
             </td>
-            <td class="py-3 px-4 text-right font-mono">${row.Units}</td>
-            <td class="py-3 px-4 text-right font-semibold text-emerald-600 font-mono">${formatTHB(row.CalculatedPrice)}</td>
+            <td class="py-3 px-4 text-right font-mono text-xs">${row.Units}</td>
+            <td class="py-3 px-4 text-right font-bold text-emerald-600 font-mono">${formatTHB(row.CalculatedPrice)}</td>
             <td class="py-3 px-4 text-center">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                <i data-lucide="check" class="w-3 h-3 mr-1"></i> Approved
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <i data-lucide="check" class="w-3 h-3 mr-1 text-emerald-500"></i> Approved
               </span>
             </td>
           </tr>
@@ -984,277 +1053,156 @@
       lucide.createIcons();
     }
 
-    function renderCharts() {
-      renderTrendChart();
-      renderPieChart();
-    }
-
-    function renderTrendChart() {
-      const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
-      if (trendChartInstance) trendChartInstance.destroy();
-
-      const months = [...new Set(filteredDataset.map(d => d.Month))].sort();
-      const centers = [...new Set(filteredDataset.map(d => d.Center))].sort();
-
-      const palette = ['#0891b2', '#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-
-      const datasets = centers.map((center, index) => {
-        const color = palette[index % palette.length];
-        const data = months.map(month => {
-          return filteredDataset
-            .filter(d => d.Center === center && d.Month === month)
-            .reduce((sum, d) => sum + d.CalculatedPrice, 0);
+    // Avoids CORS blocking completely via JSONP callback
+    window.googleSheetsCallback = function(response) {
+      if (!response || !response.table) {
+        console.warn('Invalid GViz response format.');
+        return;
+      }
+      try {
+        const cols = response.table.cols.map(c => (c && c.label) ? c.label.trim() : '');
+        const rows = response.table.rows.map(r => {
+          const item = {};
+          r.c.forEach((cell, idx) => {
+            const colName = cols[idx] || `col_${idx}`;
+            item[colName] = (cell && cell.v !== null && cell.v !== undefined) ? cell.v : (cell ? cell.f || '' : '');
+          });
+          return item;
         });
 
-        return {
-          label: center,
-          data: data,
-          borderColor: color,
-          backgroundColor: color,
-          borderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          fill: false,
-          tension: 0.2
-        };
-      });
-
-      trendChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: months.map(m => formatMonthName(m)),
-          datasets: datasets
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'top',
-              labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
-            },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => ` ${ctx.dataset.label}: ${formatTHB(ctx.raw)}`
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: (val) => '฿' + (val >= 1000 ? (val / 1000) + 'k' : val)
-              },
-              grid: { color: '#f1f5f9' }
-            },
-            x: {
-              grid: { display: false }
-            }
-          }
-        }
-      });
-    }
-
-    function renderPieChart() {
-      const ctx = document.getElementById('otTypePieChart').getContext('2d');
-      if (pieChartInstance) pieChartInstance.destroy();
-
-      const typeMap = {};
-      filteredDataset.forEach(d => {
-        typeMap[d.OT_Type] = (typeMap[d.OT_Type] || 0) + d.CalculatedPrice;
-      });
-
-      const labels = Object.keys(typeMap);
-      const data = Object.values(typeMap);
-      const colors = ['#0891b2', '#0284c7', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'];
-
-      pieChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: colors.slice(0, labels.length),
-            borderWidth: 2,
-            borderColor: '#ffffff'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
-            },
-            tooltip: {
-              callbacks: {
-                label: (c) => ` ${c.label}: ${formatTHB(c.raw)}`
-              }
-            }
-          },
-          cutout: '65%'
-        }
-      });
-    }
-
-    async function fetchLiveGoogleSheet(customUrlOrId = null, tabName = null) {
-      const targetId = customUrlOrId || localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
-      const targetTab = tabName || localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
-      const directUrl = buildGoogleSheetCsvUrl(targetId, targetTab);
-
-      const refreshIcon = document.getElementById('refreshIcon');
-      refreshIcon.classList.add('animate-spin');
-
-      try {
-        let csvText = null;
-
-        // Try direct fetch first
-        try {
-          const response = await fetch(directUrl, { cache: 'no-store' });
-          if (response.ok) {
-            csvText = await response.text();
-          }
-        } catch (corsErr) {
-          console.warn('Direct fetch failed (likely CORS), attempting via proxy...', corsErr);
-        }
-
-        // If direct fetch was blocked by browser CORS policy, fallback to safe proxy
-        if (!csvText || csvText.includes('<!DOCTYPE html>')) {
-          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
-          const proxyResponse = await fetch(proxyUrl, { cache: 'no-store' });
-          if (proxyResponse.ok) {
-            csvText = await proxyResponse.text();
-          }
-        }
-
-        if (!csvText) {
-          throw new Error('ไม่สามารถดึงข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบสิทธิ์การแชร์ชีต');
-        }
-
-        const parsed = parseCSV(csvText);
-        if (parsed.length > 0) {
-          rawDataset = normalizeData(parsed);
-          processAndFilterData();
-          updateSyncIndicator(true);
-          showToast(`ซิงค์ข้อมูลเรียลไทม์จาก OT_Data สำเร็จ (${approvedDataset.length} รายการ Approved)`, 'success');
-          return true;
-        } else {
-          throw new Error('ไม่พบแถวข้อมูลในชีต OT_Data');
+        if (rows.length > 0) {
+          masterDataset = normalizeRecords(rows);
+          processApprovedData();
+          setConnectionStatus(true, `ซิงค์สด (${approvedRecords.length} Approved)`);
+          showToastNotification(`ซิงค์ข้อมูลเรียลไทม์จาก Google Sheet สำเร็จ`, 'success');
         }
       } catch (err) {
-        console.error('Fetch Google Sheet failed:', err);
-        updateSyncIndicator(false);
-        showToast(`เชื่อมต่อชีตไม่สำเร็จ: ${err.message}`, 'error');
-        return false;
+        console.error('Error parsing GViz response:', err);
+      }
+    };
+
+    function fetchViaGvizJsonp(sheetId, tabName) {
+      return new Promise((resolve, reject) => {
+        // Clean existing jsonp tag if present
+        const oldTag = document.getElementById('gviz-jsonp-script');
+        if (oldTag) oldTag.remove();
+
+        const script = document.createElement('script');
+        script.id = 'gviz-jsonp-script';
+        const encTab = encodeURIComponent(tabName);
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encTab}&tqx=responseHandler:googleSheetsCallback&tq=`;
+
+        const timer = setTimeout(() => {
+          script.remove();
+          reject(new Error('การเชื่อมต่อกับ Google Sheet หมดเวลา (Timeout 5s)'));
+        }, 5000);
+
+        script.onload = () => {
+          clearTimeout(timer);
+          resolve(true);
+        };
+        script.onerror = () => {
+          clearTimeout(timer);
+          script.remove();
+          reject(new Error('ไม่สามารถโหลดข้อมูลจาก Google Sheet ได้ กรุณาตรวจสอบสิทธิ์การแชร์'));
+        };
+
+        document.head.appendChild(script);
+      });
+    }
+
+    async function refreshLiveData() {
+      const icon = document.getElementById('refreshIcon');
+      icon.classList.add('animate-spin');
+
+      const sheetId = localStorage.getItem('ot_sheet_id') || DEFAULT_SPREADSHEET_ID;
+      const sheetTab = localStorage.getItem('ot_sheet_tab') || DEFAULT_SHEET_TAB;
+
+      try {
+        await fetchViaGvizJsonp(sheetId, sheetTab);
+      } catch (err) {
+        console.warn('JSONP sync failed, checking fallback...', err.message);
+        setConnectionStatus(false, 'ออฟไลน์ / ใช้ข้อมูลแคช');
+        showToastNotification(`ไม่สามารถซิงค์ได้: ตรวจสอบสิทธิ์แชร์ชีต (กำลังแสดงข้อมูลแคช)`, 'error');
       } finally {
-        refreshIcon.classList.remove('animate-spin');
+        icon.classList.remove('animate-spin');
       }
     }
 
-    function triggerRefresh() {
-      fetchLiveGoogleSheet();
-    }
-
-    function updateSyncIndicator(isSuccess) {
-      const ind = document.getElementById('syncIndicator');
-      const txt = document.getElementById('lastSyncText');
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-      if (isSuccess) {
-        ind.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
-        txt.innerText = `อัปเดต: ${timeStr} (สด)`;
+    function setConnectionStatus(isOnline, text) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncStatusLabel');
+      if (isOnline) {
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
+        label.innerText = text;
+        label.className = "font-medium text-emerald-700";
       } else {
-        ind.className = "w-2 h-2 rounded-full bg-rose-500";
-        txt.innerText = `การเชื่อมต่อขัดข้อง (${timeStr})`;
+        dot.className = "w-2 h-2 rounded-full bg-amber-500";
+        label.innerText = text;
+        label.className = "font-medium text-amber-700";
       }
     }
 
-    function setupAutoRefresh(intervalMs) {
-      if (autoRefreshTimer) {
-        clearInterval(autoRefreshTimer);
-        autoRefreshTimer = null;
+    function parseCSVText(text) {
+      const lines = text.trim().split(/\r\n|\n/);
+      if (lines.length < 2) return [];
+
+      const parseRow = (line) => {
+        const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
+        const result = [];
+        let match;
+        while ((match = regex.exec(line))) {
+          let val = match[1] || '';
+          if (val.startsWith('"') && val.endsWith('"')) {
+            val = val.slice(1, -1).replace(/""/g, '"');
+          }
+          result.push(val.trim());
+          if (regex.lastIndex >= line.length) break;
+        }
+        return result;
+      };
+
+      const headers = parseRow(lines[0]);
+      const data = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = parseRow(lines[i]);
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = vals[idx] !== undefined ? vals[idx] : '';
+        });
+        data.push(obj);
       }
-      const ms = parseInt(intervalMs, 10);
-      if (ms > 0) {
-        autoRefreshTimer = setInterval(() => {
-          triggerRefresh();
-        }, ms);
-      }
+      return data;
     }
 
-    function openConfigModal() {
-      const savedId = localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
-      const savedTab = localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
-      const savedInterval = localStorage.getItem('ot_lasik_refresh_interval') || '30000';
-      
-      document.getElementById('sheetIdInput').value = savedId;
-      document.getElementById('sheetTabInput').value = savedTab;
-      document.getElementById('autoRefreshInterval').value = savedInterval;
-      document.getElementById('configModal').classList.remove('hidden');
-    }
-
-    function closeConfigModal() {
-      document.getElementById('configModal').classList.add('hidden');
-    }
-
-    function saveAndApplyConfig() {
-      const sheetInput = document.getElementById('sheetIdInput').value.trim() || TARGET_SPREADSHEET_ID;
-      const tabInput = document.getElementById('sheetTabInput').value.trim() || TARGET_SHEET_NAME;
-      const interval = document.getElementById('autoRefreshInterval').value;
-
-      localStorage.setItem('ot_lasik_sheet_id', sheetInput);
-      localStorage.setItem('ot_lasik_sheet_tab', tabInput);
-      localStorage.setItem('ot_lasik_refresh_interval', interval);
-
-      setupAutoRefresh(interval);
-      closeConfigModal();
-
-      fetchLiveGoogleSheet(sheetInput, tabInput);
-    }
-
-    function resetToTargetSheet() {
-      document.getElementById('sheetIdInput').value = TARGET_SPREADSHEET_ID;
-      document.getElementById('sheetTabInput').value = TARGET_SHEET_NAME;
-      showToast('คืนค่าเป็นชีตหลักเรียบร้อย', 'info');
-    }
-
-    function handleFileUpload(event) {
+    function handleCsvFileImport(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const text = e.target.result;
-        const parsed = parseCSV(text);
+        const parsed = parseCSVText(e.target.result);
         if (parsed.length > 0) {
-          rawDataset = normalizeData(parsed);
-          processAndFilterData();
+          masterDataset = normalizeRecords(parsed);
+          processApprovedData();
           closeConfigModal();
-          showToast(`นำเข้าไฟล์สำเร็จ ${rawDataset.length} รายการ (${approvedDataset.length} Approved)`, 'success');
+          setConnectionStatus(true, `ไฟล์ CSV: ${parsed.length} แถว`);
+          showToastNotification(`นำเข้าไฟล์ CSV สำเร็จ (${approvedRecords.length} Approved)`, 'success');
         } else {
-          showToast('ไม่พบข้อมูลที่ถูกต้องในไฟล์ CSV', 'error');
+          showToastNotification('ไม่พบแถวข้อมูลที่ถูกต้องในไฟล์', 'error');
         }
       };
       reader.readAsText(file);
     }
 
-    function loadSampleDefaultData() {
-      rawDataset = normalizeData(DEFAULT_LASIK_OT_DATA);
-      processAndFilterData();
-      closeConfigModal();
-      showToast('โหลดข้อมูลตัวอย่างสำเร็จ (แสดงเฉพาะ Approved เท่านั้น)', 'success');
-    }
-
     function exportToCSV() {
-      if (filteredDataset.length === 0) {
-        showToast('ไม่มีข้อมูลสำหรับส่งออก', 'info');
+      if (filteredRecords.length === 0) {
+        showToastNotification('ไม่มีรายการสำหรับส่งออก', 'info');
         return;
       }
-
       const headers = ["ID", "Date", "Month", "Center", "StaffName", "OT_Type", "Units", "CalculatedPrice", "Status", "Note"];
-      const rows = filteredDataset.map(r => [
+      const rows = filteredRecords.map(r => [
         r.ID,
         r.Date,
         r.Month,
@@ -1267,34 +1215,81 @@
         `"${(r.Note || '').replace(/"/g, '""')}"`
       ]);
 
-      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const csv = "\uFEFF" + [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `OT_Lasik_Approved_Summary_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast('ส่งออกไฟล์ CSV สำเร็จ', 'success');
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `OT_Lasik_Approved_Report_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToastNotification('ส่งออกไฟล์ CSV สำเร็จ', 'success');
     }
 
-    function showToast(message, type = 'info') {
-      const toast = document.getElementById('toast');
-      const toastMessage = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
+    function openConfigModal() {
+      document.getElementById('cfgSheetId').value = localStorage.getItem('ot_sheet_id') || DEFAULT_SPREADSHEET_ID;
+      document.getElementById('cfgSheetTab').value = localStorage.getItem('ot_sheet_tab') || DEFAULT_SHEET_TAB;
+      document.getElementById('cfgAutoInterval').value = localStorage.getItem('ot_auto_interval') || '30000';
+      document.getElementById('configModal').classList.remove('hidden');
+    }
 
-      toastMessage.innerText = message;
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
 
+    function resetDefaultConfig() {
+      document.getElementById('cfgSheetId').value = DEFAULT_SPREADSHEET_ID;
+      document.getElementById('cfgSheetTab').value = DEFAULT_SHEET_TAB;
+      document.getElementById('cfgAutoInterval').value = '30000';
+      showToastNotification('คืนค่าเริ่มต้นเรียบร้อย', 'info');
+    }
+
+    function saveAndSyncConfig() {
+      let sheetId = document.getElementById('cfgSheetId').value.trim() || DEFAULT_SPREADSHEET_ID;
+      const match = sheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) sheetId = match[1];
+
+      const sheetTab = document.getElementById('cfgSheetTab').value.trim() || DEFAULT_SHEET_TAB;
+      const interval = document.getElementById('cfgAutoInterval').value;
+
+      localStorage.setItem('ot_sheet_id', sheetId);
+      localStorage.setItem('ot_sheet_tab', sheetTab);
+      localStorage.setItem('ot_auto_interval', interval);
+
+      setupAutoRefreshPolling(interval);
+      closeConfigModal();
+      refreshLiveData();
+    }
+
+    function setupAutoRefreshPolling(intervalMs) {
+      if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+      }
+      const ms = parseInt(intervalMs, 10);
+      if (ms > 0) {
+        autoRefreshTimer = setInterval(() => {
+          refreshLiveData();
+        }, ms);
+      }
+    }
+
+    function showToastNotification(message, type = 'info') {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMsg');
+      const icon = document.getElementById('toastIcon');
+
+      msg.innerText = message;
       if (type === 'success') {
-        toastIcon.className = 'text-emerald-400';
-        toastIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+        icon.className = 'text-emerald-400';
+        icon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
       } else if (type === 'error') {
-        toastIcon.className = 'text-rose-400';
-        toastIcon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+        icon.className = 'text-rose-400';
+        icon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
       } else {
-        toastIcon.className = 'text-cyan-400';
-        toastIcon.innerHTML = '<i data-lucide="info" class="w-5 h-5"></i>';
+        icon.className = 'text-teal-400';
+        icon.innerHTML = '<i data-lucide="info" class="w-5 h-5"></i>';
       }
       lucide.createIcons();
 
@@ -1304,29 +1299,20 @@
       }, 3500);
     }
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
     window.onload = function() {
       lucide.createIcons();
 
-      // Load saved configuration or default to user's specified Sheet ID
-      const savedId = localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
-      const savedTab = localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
-      const savedInterval = localStorage.getItem('ot_lasik_refresh_interval') || '30000';
+      // 1. Instant Render: Display data immediately without blocking UI
+      processApprovedData();
 
-      // Load initial data from target Google Sheet
-      fetchLiveGoogleSheet(savedId, savedTab);
+      // 2. Setup periodic interval
+      const savedInterval = localStorage.getItem('ot_auto_interval') || '30000';
+      setupAutoRefreshPolling(savedInterval);
 
-      // Start real-time auto-refresh polling
-      setupAutoRefresh(savedInterval);
+      // 3. Trigger live Google Sheets sync in background
+      setTimeout(() => {
+        refreshLiveData();
+      }, 300);
     };
   </script>
 </body>
