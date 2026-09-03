@@ -1078,6 +1078,26 @@
             borderWidth: 2,
             borderColor: '#ffffff'
           }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                label: (c) => ` ${c.label}: ${formatTHB(c.raw)}`
+              }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+
     async function fetchLiveGoogleSheet(customUrlOrId = null, tabName = null) {
       const targetId = customUrlOrId || localStorage.getItem('ot_lasik_sheet_id') || TARGET_SPREADSHEET_ID;
       const targetTab = tabName || localStorage.getItem('ot_lasik_sheet_tab') || TARGET_SHEET_NAME;
