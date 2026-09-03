@@ -397,45 +397,6 @@
 
     </section>
 
-    <!-- Executive Deep-Dive Analytics (Replaced the Raw Audit Table) -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Chart 1: Center x OT_Type Stacked Breakdown -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="bar-chart-3" class="w-4 h-4 text-teal-600"></i>
-              โครงสร้างหัตถการในแต่ละศูนย์บริการ
-            </h3>
-            <p class="text-xs text-slate-500">เปรียบเทียบสัดส่วนและมูลค่าค่าตอบแทนแยกตามประเภท OT</p>
-          </div>
-          <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">Stacked THB</span>
-        </div>
-        <div class="relative h-72 sm:h-80 w-full">
-          <canvas id="centerStackedChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Chart 2: Top 10 Surgeons & Personnel Leaderboard -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-              <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
-              10 อันดับบุคลากร/แพทย์ที่มียอดเบิกสูงสุด
-            </h3>
-            <p class="text-xs text-slate-500">จัดอันดับตามมูลค่า CalculatedPrice รวมทั้งหมด</p>
-          </div>
-          <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">Top 10 Staff</span>
-        </div>
-        <div class="relative h-72 sm:h-80 w-full">
-          <canvas id="topStaffChart"></canvas>
-        </div>
-      </div>
-
-    </section>
-
   </main>
 
   <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
@@ -563,8 +524,6 @@
     let autoRefreshTimer = null;
     let trendChartInstance = null;
     let doughnutChartInstance = null;
-    let centerStackedChartInstance = null;
-    let topStaffChartInstance = null;
 
     function formatTHB(amount) {
       const num = Number(amount) || 0;
@@ -920,7 +879,6 @@
       renderKPIs();
       renderMatrixTable();
       renderCharts();
-      renderNewExecutiveCharts();
     }
 
     function resetFilters() {
@@ -1370,146 +1328,6 @@
               }
             },
             cutout: '58%'
-          }
-        });
-      }
-    }
-
-    // NEW FUNCTION: Renders two high-value analytical charts replacing the audit table
-    function renderNewExecutiveCharts() {
-      // 1. Center x OT_Type Stacked Bar Chart
-      const centers = [...new Set(filteredRecords.map(r => r.Center).filter(Boolean))].sort();
-      const otTypes = [...new Set(approvedRecords.map(r => r.OT_Type).filter(Boolean))].sort();
-
-      const palette = [
-        '#0d9488', '#0284c7', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#64748b'
-      ];
-
-      const stackedDatasets = otTypes.map((type, idx) => {
-        const data = centers.map(center => {
-          return filteredRecords
-            .filter(r => r.Center === center && r.OT_Type === type)
-            .reduce((acc, row) => acc + (Number(row.CalculatedPrice) || 0), 0);
-        });
-
-        return {
-          label: type,
-          data: data,
-          backgroundColor: palette[idx % palette.length],
-          borderRadius: 4
-        };
-      });
-
-      const stackedCtx = document.getElementById('centerStackedChart')?.getContext('2d');
-      if (stackedCtx) {
-        if (centerStackedChartInstance) centerStackedChartInstance.destroy();
-        centerStackedChartInstance = new Chart(stackedCtx, {
-          type: 'bar',
-          data: {
-            labels: centers,
-            datasets: stackedDatasets
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                stacked: true,
-                grid: { display: false },
-                ticks: { font: { family: 'Prompt', size: 11 } }
-              },
-              y: {
-                stacked: true,
-                beginAtZero: true,
-                ticks: {
-                  callback: val => '฿' + (val >= 1000 ? (val / 1000).toLocaleString() + 'k' : val),
-                  font: { family: 'Inter', size: 11 }
-                },
-                grid: { color: 'rgba(226, 232, 240, 0.6)' }
-              }
-            },
-            plugins: {
-              legend: {
-                position: 'top',
-                labels: { boxWidth: 10, font: { family: 'Prompt', size: 11 } }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(ctx) {
-                    return `${ctx.dataset.label}: ${formatTHB(ctx.parsed.y)}`;
-                  }
-                }
-              }
-            }
-          }
-        });
-      }
-
-      // 2. Top 10 Personnel / Surgeons Leaderboard Chart
-      const staffMap = {};
-      filteredRecords.forEach(r => {
-        const staff = r.StaffName || 'ไม่ระบุ';
-        if (!staffMap[staff]) {
-          staffMap[staff] = { totalCost: 0, cases: 0 };
-        }
-        staffMap[staff].totalCost += (Number(r.CalculatedPrice) || 0);
-        staffMap[staff].cases += (Number(r.Units) || 1);
-      });
-
-      // Sort Top 10 by totalCost
-      const topStaffSorted = Object.entries(staffMap)
-        .sort((a, b) => b[1].totalCost - a[1].totalCost)
-        .slice(0, 10);
-
-      const staffLabels = topStaffSorted.map(s => s[0]);
-      const staffValues = topStaffSorted.map(s => s[1].totalCost);
-      const staffCases = topStaffSorted.map(s => s[1].cases);
-
-      const topStaffCtx = document.getElementById('topStaffChart')?.getContext('2d');
-      if (topStaffCtx) {
-        if (topStaffChartInstance) topStaffChartInstance.destroy();
-        topStaffChartInstance = new Chart(topStaffCtx, {
-          type: 'bar',
-          data: {
-            labels: staffLabels,
-            datasets: [{
-              label: 'ยอดเบิกสุทธิ (THB)',
-              data: staffValues,
-              backgroundColor: 'rgba(20, 184, 166, 0.85)',
-              hoverBackgroundColor: 'rgba(13, 148, 136, 1)',
-              borderRadius: 6
-            }]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                beginAtZero: true,
-                ticks: {
-                  callback: val => '฿' + (val >= 1000 ? (val / 1000).toLocaleString() + 'k' : val),
-                  font: { family: 'Inter', size: 11 }
-                },
-                grid: { color: 'rgba(226, 232, 240, 0.6)' }
-              },
-              y: {
-                grid: { display: false },
-                ticks: { font: { family: 'Prompt', size: 11 } }
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function(ctx) {
-                    const idx = ctx.dataIndex;
-                    const cases = staffCases[idx];
-                    return `ยอดเบิก: ${formatTHB(ctx.parsed.x)} (${cases} เคส/ชม.)`;
-                  }
-                }
-              }
-            }
           }
         });
       }
