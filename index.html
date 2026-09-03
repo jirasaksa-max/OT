@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OT Lasik Analytics & Real-time Cost Summary</title>
+  
+  <!-- Fonts: Inter & Prompt for clean medical/corporate Thai typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfeff',
+              100: '#cffafe',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+              800: '#155e75',
+              900: '#164e63',
+            },
+            clinical: {
+              navy: '#0f172a',
+              card: '#ffffff',
+              border: '#e2e8f0'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    
+    /* Smooth scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .pulse-dot {
+      animation: pulseAnimation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulseAnimation {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(1.15); }
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff !important; }
+      .print-shadow-none { box-shadow: none !important; border: 1px solid #ddd !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Title & Tag -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+            <i data-lucide="activity" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-lg text-slate-900 tracking-tight leading-tight">OT Lasik Expense Hub</h1>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 pulse-dot"></span>
+                Approved Only
+              </span>
+            </div>
+            <p class="text-xs text-slate-500">ระบบสรุปและวิเคราะห์ค่าตอบแทน OT ศูนย์เลสิกแบบเรียลไทม์</p>
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Real-time Status Badge -->
+          <div id="liveStatusContainer" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-600">
+            <span id="syncIndicator" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="lastSyncText">อัปเดต: เมื่อสักครู่</span>
+          </div>
+
+          <!-- Refresh Now Button -->
+          <button id="refreshBtn" onclick="triggerRefresh()" class="p-2 sm:px-3 sm:py-2 text-slate-700 hover:text-cyan-700 hover:bg-slate-100 rounded-lg text-xs sm:text-sm font-medium border border-slate-200 flex items-center gap-1.5 transition">
+            <i data-lucide="refresh-cw" id="refreshIcon" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">รีเฟรช</span>
+          </button>
+
+          <!-- Sheet / Source Config Modal Button -->
+          <button onclick="openConfigModal()" class="px-3 py-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg text-xs sm:text-sm font-medium shadow-sm shadow-cyan-900/20 flex items-center gap-1.5 transition">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span>ตั้งค่าแหล่งข้อมูล</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Filter Toolbar Card -->
+    <section class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        
+        <!-- Left: Quick Filter Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 flex-1">
+          <!-- Center Filter -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <i data-lucide="building-2" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>ศูนย์ / สาขา (Center)
+            </label>
+            <select id="filterCenter" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
+              <option value="ALL">ทุกศูนย์บริการ (All Centers)</option>
+            </select>
+          </div>
+
+          <!-- Month Filter -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>เดือน (Month)
+            </label>
+            <select id="filterMonth" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
+              <option value="ALL">ทุกเดือน (All Months)</option>
+            </select>
+          </div>
+
+          <!-- OT Type Filter -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <i data-lucide="tag" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>ประเภท OT (OT_Type)
+            </label>
+            <select id="filterOtType" onchange="applyFilters()" class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
+              <option value="ALL">ทุกประเภท (All OT Types)</option>
+            </select>
+          </div>
+
+          <!-- Search Staff / Doctor -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <i data-lucide="search" class="w-3.5 h-3.5 inline mr-1 text-cyan-600"></i>ค้นหาเจ้าหน้าที่ / Note
+            </label>
+            <input type="text" id="filterKeyword" oninput="applyFilters()" placeholder="พิมพ์ชื่อ, รหัสพนักงาน..." class="w-full text-sm rounded-xl border border-slate-200 px-3 py-2 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition" />
+          </div>
+        </div>
+
+        <!-- Right: Reset & Export Button -->
+        <div class="flex items-center gap-2 self-end lg:self-center pt-2 lg:pt-0">
+          <button onclick="resetFilters()" class="px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl border border-slate-200 transition">
+            ล้างตัวกรอง
+          </button>
+          <button onclick="exportToCSV()" class="px-3.5 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl flex items-center gap-1.5 transition">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            ส่งออก CSV
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      
+      <!-- Card 1: Total Approved Amount -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ยอดเบิก OT อนุมัติรวม</p>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="flex items-baseline gap-1">
+            <span class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="kpiTotalApproved">฿0</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+            <span class="text-emerald-600 font-medium">Approved Status เท่านั้น</span>
+          </p>
+        </div>
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-50/50 rounded-full blur-xl pointer-events-none"></div>
+      </div>
+
+      <!-- Card 2: Total Approved Cases -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">รายการที่อนุมัติ (Cases)</p>
+          <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
+            <i data-lucide="check-check" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="flex items-baseline gap-1">
+            <span class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight" id="kpiTotalCases">0</span>
+            <span class="text-xs text-slate-500">รายการ</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1" id="kpiAveragePerCase">เฉลี่ย ฿0 / รายการ</p>
+        </div>
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-50/50 rounded-full blur-xl pointer-events-none"></div>
+      </div>
+
+      <!-- Card 3: Top Center by Cost -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ศูนย์ที่มีค่าใช้จ่ายสูงสุด</p>
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="building" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div class="mt-3">
+          <h3 class="text-lg sm:text-xl font-bold text-slate-900 truncate" id="kpiTopCenter">-</h3>
+          <p class="text-xs text-slate-500 mt-1" id="kpiTopCenterAmount">฿0 (0% ของยอดทั้งหมด)</p>
+        </div>
+      </div>
+
+      <!-- Card 4: Top OT Type -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-cyan-200 transition">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ประเภท OT สูงสุด</p>
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="pie-chart" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div class="mt-3">
+          <h3 class="text-lg sm:text-xl font-bold text-slate-900 truncate" id="kpiTopOtType">-</h3>
+          <p class="text-xs text-slate-500 mt-1" id="kpiTopOtTypeAmount">฿0</p>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Trend By Month and Center (2 cols on large screen) -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <i data-lucide="line-chart" class="w-4 h-4 text-cyan-600"></i>
+              แนวโน้มค่าตอบแทน OT รายเดือนแบ่งตามศูนย์ (CalculatedPrice)
+            </h2>
+            <p class="text-xs text-slate-500">เฉพาะข้อมูลสถานะ Approved เท่านั้น</p>
+          </div>
+          <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">หน่วย: บาท</span>
+        </div>
+        <div class="relative h-72 sm:h-80 w-full">
+          <canvas id="monthlyTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- OT Type Share Breakdown (1 col on large screen) -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="font-bold text-slate-900 text-base flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-cyan-600"></i>
+              สัดส่วนค่าใช้จ่ายตาม OT_Type
+            </h2>
+            <p class="text-xs text-slate-500">สัดส่วนประเภทการทำหัตถการและเวร</p>
+          </div>
+        </div>
+        <div class="relative h-72 sm:h-80 w-full flex items-center justify-center">
+          <canvas id="otTypePieChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-bold text-slate-900 text-base sm:text-lg">
+              ตารางสรุปเมทริกซ์ (Pivot Summary Matrix)
+            </h2>
+            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-cyan-100 text-cyan-800">
+              Center × เดือน × OT_Type
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">
+            สรุปยอด CalculatedPrice สุทธิของแต่ละศูนย์บริการในแต่ละเดือน แยกตามประเภท OT
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500">มุมมอง:</span>
+          <div class="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs">
+            <button id="matrixCompactBtn" onclick="toggleMatrixDetail(false)" class="px-3 py-1 rounded-md font-medium text-cyan-700 bg-cyan-50">แบบกระชับ</button>
+            <button id="matrixDetailBtn" onclick="toggleMatrixDetail(true)" class="px-3 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900">แบบแจกแจงทุกประเภท</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pivot Table Scrollable Container -->
+      <div class="overflow-x-auto">
+        <table id="matrixTable" class="w-full text-left border-collapse text-sm">
+          <!-- Dynamic generated by JS -->
+          <tbody id="matrixTableBody">
+            <tr>
+              <td class="p-8 text-center text-slate-400">กำลังประมวลผลข้อมูล...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded bg-emerald-500"></span>
+          <span>เฉพาะข้อมูลที่ได้รับการอนุมัติ (Status = Approved) จากชีต <strong>OT_Data</strong></span>
+        </div>
+        <span id="matrixRecordCount" class="font-medium text-slate-600">0 รายการ</span>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="font-bold text-slate-900 text-base">รายการบันทึก OT ทั้งหมด (Approved Records)</h2>
+          <p class="text-xs text-slate-500">สามารถค้นหา คัดกรอง และตรวจสอบรายละเอียดแต่ละเคส</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400" id="tablePageInfo">แสดง 0 รายการ</span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto max-h-96">
+        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+          <thead class="sticky top-0 bg-slate-100/90 backdrop-blur text-slate-600 font-semibold border-b border-slate-200 select-none">
+            <tr>
+              <th class="py-3 px-4">วันที่ปฏิบัติงาน</th>
+              <th class="py-3 px-4">ศูนย์ (Center)</th>
+              <th class="py-3 px-4">บุคลากร / แพทย์</th>
+              <th class="py-3 px-4">ประเภท OT (OT_Type)</th>
+              <th class="py-3 px-4 text-right">จำนวนเคส/ชั่วโมง</th>
+              <th class="py-3 px-4 text-right">CalculatedPrice</th>
+              <th class="py-3 px-4 text-center">สถานะ</th>
+            </tr>
+          </thead>
+          <tbody id="rawTableBody" class="divide-y divide-slate-100 text-slate-700">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Configuration & Live Google Sheets Modal -->
+  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">ตั้งค่าการเชื่อมต่อชีต OT_Data</h3>
+            <p class="text-xs text-slate-500">ดึงข้อมูลแบบ Real-time ผ่าน Google Sheets CSV หรืออัปโหลดไฟล์</p>
+          </div>
+        </div>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm">
+        <!-- Google Sheets CSV URL Input -->
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">
+            URL เผยแพร่ของ Google Sheets (Publish to web as CSV):
+          </label>
+          <input type="text" id="sheetCsvUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&output=csv" 
+            class="w-full text-xs font-mono rounded-xl border border-slate-200 px-3 py-2.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-cyan-500 focus:outline-none transition">
+          <p class="text-[11px] text-slate-400 mt-1">
+            * ใน Google Sheet เลือก: <em>ไฟล์ (File) &gt; แชร์ (Share) &gt; เผยแพร่ไปยังเว็บ (Publish to web) &gt; เลือกแผ่นงาน OT_Data &gt; รูปแบบ .CSV</em>
+          </p>
+        </div>
+
+        <!-- Real-time Polling Interval -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">ความถี่ในการดึงข้อมูลอัตโนมัติ:</label>
+            <select id="autoRefreshInterval" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+              <option value="0">ปิดการดึงอัตโนมัติ (Manual)</option>
+              <option value="15000">ทุก 15 วินาที (High-frequency)</option>
+              <option value="30000" selected>ทุก 30 วินาที (แนะนำ)</option>
+              <option value="60000">ทุก 1 นาที</option>
+              <option value="300000">ทุก 5 นาที</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">หรืออัปโหลดไฟล์ CSV ปัจจุบัน:</label>
+            <label class="w-full flex items-center justify-center px-3 py-2 border border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 text-cyan-700 text-xs font-medium">
+              <i data-lucide="upload" class="w-3.5 h-3.5 mr-1.5"></i>
+              <span>เลือกไฟล์ CSV</span>
+              <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileUpload(event)">
+            </label>
+          </div>
+        </div>
+
+        <!-- Quick Demo Dataset Switcher -->
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="font-semibold text-slate-800 text-xs">ชุดข้อมูลเริ่มต้น (Demo Dataset):</span>
+              <p class="text-[11px] text-slate-500">สร้างจากข้อมูลตัวอย่างศูนย์เลสิกจริง (สาขาสยาม, พระราม 9, เชียงใหม่, พัทยา)</p>
+            </div>
+            <button onclick="loadSampleDefaultData()" class="px-2.5 py-1 text-xs bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-700">
+              โหลดข้อมูลตัวอย่าง
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <button onclick="closeConfigModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
+          ยกเลิก
+        </button>
+        <button onclick="saveAndApplyConfig()" class="px-4 py-2 text-xs font-semibold text-white bg-cyan-700 hover:bg-cyan-800 rounded-xl shadow-sm transition">
+          บันทึกและซิงค์ทันที
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm w-full bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-3 transform transition duration-300">
+    <div id="toastIcon" class="text-emerald-400">
+      <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+    </div>
+    <div class="flex-1">
+      <p id="toastMessage" class="text-xs font-medium leading-snug">แจ้งเตือน</p>
+    </div>
+  </div>
+
+  <script>
+    // Global State
+    let rawDataset = [];       // All rows from CSV
+    let approvedDataset = [];  // Filtered rows where Status === 'Approved'
+    let filteredDataset = [];  // Current view filtered by user controls
+    let showDetailedMatrix = false;
+    let autoRefreshTimer = null;
+    let trendChartInstance = null;
+    let pieChartInstance = null;
+
+    // Default sample OT_Data reflecting authentic Thai Hospital/Lasik center operations
+    // Contains rows with Status: Approved, Pending, Rejected to demonstrate strict Approved-only filtering
+    const DEFAULT_LASIK_OT_DATA = [
+      { ID: "OT-2026-001", Date: "2026-01-05", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "Femto-LASIK", Units: 3, CalculatedPrice: 4500, Status: "Approved", Note: "เคสเช้าวันเสาร์" },
+      { ID: "OT-2026-002", Date: "2026-01-06", Month: "2026-01", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ReLEx SMILE", Units: 4, CalculatedPrice: 8000, Status: "Approved", Note: "เคสช่วงเย็น" },
+      { ID: "OT-2026-003", Date: "2026-01-08", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา (OR Nurse)", OT_Type: "Femto-LASIK", Units: 5, CalculatedPrice: 3500, Status: "Approved", Note: "ช่วยผ่าตัด" },
+      { ID: "OT-2026-004", Date: "2026-01-10", Month: "2026-01", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "PRK", Units: 2, CalculatedPrice: 2600, Status: "Approved", Note: "เคสพิเศษ" },
+      { ID: "OT-2026-005", Date: "2026-01-12", Month: "2026-01", Center: "ศูนย์เลสิก พัทยา", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2400, Status: "Approved", Note: "สแตนด์บายวันอาทิตย์" },
+      { ID: "OT-2026-006", Date: "2026-01-15", Month: "2026-01", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 6000, Status: "Pending", Note: "รออนุมัติหัวหน้าแผนก" },
+      { ID: "OT-2026-007", Date: "2026-01-18", Month: "2026-01", Center: "ศูนย์เลสิก สยาม", StaffName: "ดร. อภิสิทธิ์ (นักทัศนมาตร)", OT_Type: "Refraction & Screening", Units: 6, CalculatedPrice: 3000, Status: "Approved", Note: "ตรวจค่าสายตาก่อนทำเลสิก" },
+      { ID: "OT-2026-008", Date: "2026-01-20", Month: "2026-01", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "พว. กัลยา", OT_Type: "ReLEx SMILE", Units: 3, CalculatedPrice: 4200, Status: "Approved", Note: "เคส SMILE Pro" },
+      
+      { ID: "OT-2026-009", Date: "2026-02-03", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 5, CalculatedPrice: 10000, Status: "Approved", Note: "เคสเสาร์บ่าย" },
+      { ID: "OT-2026-010", Date: "2026-02-05", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. วรวัฒน์", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", Note: "ผ่าตัดเลสิกไร้ใบมีด" },
+      { ID: "OT-2026-011", Date: "2026-02-07", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "พว. จุฑามาศ", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2800, Status: "Approved", Note: "เวรวันหยุด" },
+      { ID: "OT-2026-012", Date: "2026-02-10", Month: "2026-02", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "พญ. มนัสนันท์", OT_Type: "PRK", Units: 4, CalculatedPrice: 5200, Status: "Approved", Note: "เคส PRK ราชการ" },
+      { ID: "OT-2026-013", Date: "2026-02-14", Month: "2026-02", Center: "ศูนย์เลสิก พัทยา", StaffName: "นพ. สิทธิพร", OT_Type: "Femto-LASIK", Units: 3, CalculatedPrice: 4500, Status: "Approved", Note: "เคสนักท่องเที่ยวต่างชาติ" },
+      { ID: "OT-2026-014", Date: "2026-02-18", Month: "2026-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 5000, Status: "Approved", Note: "เคสใส่เลนส์เสริม" },
+      { ID: "OT-2026-015", Date: "2026-02-22", Month: "2026-02", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. เอกชัย", OT_Type: "Femto-LASIK", Units: 2, CalculatedPrice: 3000, Status: "Rejected", Note: "เอกสารข้อมูลไม่ครบ" },
+      
+      { ID: "OT-2026-016", Date: "2026-03-02", Month: "2026-03", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 6, CalculatedPrice: 12000, Status: "Approved", Note: "เคส SMILE เพิ่มเติม" },
+      { ID: "OT-2026-017", Date: "2026-03-04", Month: "2026-03", Center: "ศูนย์เลสิก พระราม 9", StaffName: "พว. ศิริพร", OT_Type: "Refraction & Screening", Units: 7, CalculatedPrice: 3500, Status: "Approved", Note: "ตรวจสายตาวันหยุด" },
+      { ID: "OT-2026-018", Date: "2026-03-06", Month: "2026-03", Center: "ศูนย์เลสิก พัทยา", StaffName: "นพ. สิทธิพร", OT_Type: "ReLEx SMILE", Units: 3, CalculatedPrice: 6000, Status: "Approved", Note: "เคสช่วงเช้า" },
+      { ID: "OT-2026-019", Date: "2026-03-08", Month: "2026-03", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", Note: "เคสมาตรฐาน" },
+      { ID: "OT-2026-020", Date: "2026-03-10", Month: "2026-03", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. รุ่งนภา", OT_Type: "On-Call / Standby", Units: 6, CalculatedPrice: 2100, Status: "Approved", Note: "เวรฉุกเฉิน" },
+      { ID: "OT-2026-021", Date: "2026-03-12", Month: "2026-03", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 3, CalculatedPrice: 9000, Status: "Approved", Note: "เคส ICL Toric" }
+    ];
+
+    // Helper to format currency in Thai Baht format
+    function formatTHB(val) {
+      const num = Number(val) || 0;
+      return '฿' + num.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    // Parse CSV Text into JSON Objects
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r\n|\n/);
+      if (lines.length < 2) return [];
+
+      // Split header by comma taking care of quotes
+      const parseLine = (line) => {
+        const regex = /(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))/g;
+        const matches = [];
+        let match;
+        while ((match = regex.exec(line))) {
+          let val = match[1] || '';
+          if (val.startsWith('"') && val.endsWith('"')) {
+            val = val.slice(1, -1).replace(/""/g, '"');
+          }
+          matches.push(val.trim());
+          if (regex.lastIndex >= line.length) break;
+        }
+        return matches;
+      };
+
+      const headers = parseLine(lines[0]);
+      
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = parseLine(lines[i]);
+        const obj = {};
+        headers.forEach((h, index) => {
+          obj[h] = values[index] !== undefined ? values[index] : '';
+        });
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    // Normalize raw sheet data so it aligns seamlessly with our standard model
+    function normalizeData(data) {
+      return data.map((item, idx) => {
+        // Detect Center
+        const center = item.Center || item.center || item.Branch || item['ศูนย์'] || item['สาขา'] || 'ไม่ระบุศูนย์';
+        
+        // Detect OT_Type
+        const otType = item.OT_Type || item.ot_type || item.OtType || item['ประเภทOT'] || item['ประเภท'] || 'General OT';
+        
+        // Detect Status
+        const status = (item.Status || item.status || item['สถานะ'] || 'Pending').trim();
+        
+        // Detect CalculatedPrice (remove comma, parse to float)
+        let rawPrice = item.CalculatedPrice ?? item.calculated_price ?? item.Price ?? item['ยอดเงิน'] ?? item['ค่าตอบแทน'] ?? 0;
+        if (typeof rawPrice === 'string') {
+          rawPrice = parseFloat(rawPrice.replace(/[^0-9.-]+/g, '')) || 0;
+        }
+
+        // Detect Date / Month
+        const dateStr = item.Date || item.WorkDate || item['วันที่'] || new Date().toISOString().slice(0, 10);
+        let month = item.Month || item['เดือน'];
+        if (!month && dateStr) {
+          month = dateStr.slice(0, 7); // Extract YYYY-MM
+        }
+
+        return {
+          ID: item.ID || item.id || `OT-${idx + 1}`,
+          Date: dateStr,
+          Month: month || '2026-01',
+          Center: center.trim(),
+          StaffName: item.StaffName || item.Doctor || item.Nurse || item['ชื่อ'] || item['ผู้ปฏิบัติงาน'] || 'บุคลากร',
+          OT_Type: otType.trim(),
+          Units: parseFloat(item.Units || item.Hours || item['จำนวน'] || 1) || 1,
+          CalculatedPrice: Number(rawPrice) || 0,
+          Status: status,
+          Note: item.Note || item.Remarks || item['หมายเหตุ'] || ''
+        };
+      });
+    }
+
+    function processAndFilterData() {
+      // MANDATORY CRITERIA:
+      // ดึงข้อมูลเฉพาะ Approved ของคอลัม Status เท่านั้น
+      approvedDataset = rawDataset.filter(item => {
+        return item.Status && item.Status.toLowerCase() === 'approved';
+      });
+
+      // Populate filter dropdowns dynamically based on approved data
+      populateFilterOptions();
+
+      // Apply User Selection Filters (Center, Month, OT_Type, Search)
+      applyFilters();
+    }
+
+    function populateFilterOptions() {
+      const centerSelect = document.getElementById('filterCenter');
+      const monthSelect = document.getElementById('filterMonth');
+      const otTypeSelect = document.getElementById('filterOtType');
+
+      const currentCenter = centerSelect.value;
+      const currentMonth = monthSelect.value;
+      const currentOtType = otTypeSelect.value;
+
+      // Extract unique values
+      const centers = [...new Set(approvedDataset.map(d => d.Center))].sort();
+      const months = [...new Set(approvedDataset.map(d => d.Month))].sort();
+      const otTypes = [...new Set(approvedDataset.map(d => d.OT_Type))].sort();
+
+      // Reset and fill
+      centerSelect.innerHTML = '<option value="ALL">ทุกศูนย์บริการ (All Centers)</option>';
+      centers.forEach(c => {
+        centerSelect.innerHTML += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`;
+      });
+      if (centers.includes(currentCenter)) centerSelect.value = currentCenter;
+
+      monthSelect.innerHTML = '<option value="ALL">ทุกเดือน (All Months)</option>';
+      months.forEach(m => {
+        monthSelect.innerHTML += `<option value="${escapeHtml(m)}">${escapeHtml(formatMonthName(m))}</option>`;
+      });
+      if (months.includes(currentMonth)) monthSelect.value = currentMonth;
+
+      otTypeSelect.innerHTML = '<option value="ALL">ทุกประเภท (All OT Types)</option>';
+      otTypes.forEach(t => {
+        otTypeSelect.innerHTML += `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`;
+      });
+      if (otTypes.includes(currentOtType)) otTypeSelect.value = currentOtType;
+    }
+
+    function formatMonthName(monthStr) {
+      if (!monthStr || monthStr === 'ALL') return monthStr;
+      const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      const parts = monthStr.split('-');
+      if (parts.length === 2) {
+        const year = parseInt(parts[0], 10) + 543; // พ.ศ.
+        const mIdx = parseInt(parts[1], 10) - 1;
+        if (mIdx >= 0 && mIdx < 12) {
+          return `${thaiMonths[mIdx]} ${year}`;
+        }
+      }
+      return monthStr;
+    }
+
+    function applyFilters() {
+      const selectedCenter = document.getElementById('filterCenter').value;
+      const selectedMonth = document.getElementById('filterMonth').value;
+      const selectedOtType = document.getElementById('filterOtType').value;
+      const keyword = (document.getElementById('filterKeyword').value || '').trim().toLowerCase();
+
+      filteredDataset = approvedDataset.filter(item => {
+        if (selectedCenter !== 'ALL' && item.Center !== selectedCenter) return false;
+        if (selectedMonth !== 'ALL' && item.Month !== selectedMonth) return false;
+        if (selectedOtType !== 'ALL' && item.OT_Type !== selectedOtType) return false;
+        if (keyword) {
+          const matchStaff = item.StaffName.toLowerCase().includes(keyword);
+          const matchNote = item.Note.toLowerCase().includes(keyword);
+          const matchId = item.ID.toLowerCase().includes(keyword);
+          if (!matchStaff && !matchNote && !matchId) return false;
+        }
+        return true;
+      });
+
+      // Update UI components
+      renderKPIs();
+      renderCharts();
+      renderMatrixTable();
+      renderRawTable();
+    }
+
+    function resetFilters() {
+      document.getElementById('filterCenter').value = 'ALL';
+      document.getElementById('filterMonth').value = 'ALL';
+      document.getElementById('filterOtType').value = 'ALL';
+      document.getElementById('filterKeyword').value = '';
+      applyFilters();
+      showToast('ล้างตัวกรองทั้งหมดเรียบร้อย', 'info');
+    }
+
+    function renderKPIs() {
+      const totalAmount = filteredDataset.reduce((sum, row) => sum + (row.CalculatedPrice || 0), 0);
+      const totalCases = filteredDataset.length;
+      const avgPerCase = totalCases > 0 ? (totalAmount / totalCases) : 0;
+
+      document.getElementById('kpiTotalApproved').innerText = formatTHB(totalAmount);
+      document.getElementById('kpiTotalCases').innerText = totalCases.toLocaleString();
+      document.getElementById('kpiAveragePerCase').innerText = `เฉลี่ย ${formatTHB(avgPerCase)} / รายการ`;
+
+      // Calculate Top Center
+      const centerTotals = {};
+      filteredDataset.forEach(row => {
+        centerTotals[row.Center] = (centerTotals[row.Center] || 0) + row.CalculatedPrice;
+      });
+      let topCenterName = '-';
+      let topCenterVal = 0;
+      Object.entries(centerTotals).forEach(([center, val]) => {
+        if (val > topCenterVal) {
+          topCenterVal = val;
+          topCenterName = center;
+        }
+      });
+      const topCenterPct = totalAmount > 0 ? ((topCenterVal / totalAmount) * 100).toFixed(1) : 0;
+      document.getElementById('kpiTopCenter').innerText = topCenterName;
+      document.getElementById('kpiTopCenterAmount').innerText = `${formatTHB(topCenterVal)} (${topCenterPct}%)`;
+
+      // Calculate Top OT Type
+      const typeTotals = {};
+      filteredDataset.forEach(row => {
+        typeTotals[row.OT_Type] = (typeTotals[row.OT_Type] || 0) + row.CalculatedPrice;
+      });
+      let topTypeName = '-';
+      let topTypeVal = 0;
+      Object.entries(typeTotals).forEach(([type, val]) => {
+        if (val > topTypeVal) {
+          topTypeVal = val;
+          topTypeName = type;
+        }
+      });
+      document.getElementById('kpiTopOtType').innerText = topTypeName;
+      document.getElementById('kpiTopOtTypeAmount').innerText = formatTHB(topTypeVal);
+    }
+
+    function renderMatrixTable() {
+      const tbody = document.getElementById('matrixTableBody');
+      const countEl = document.getElementById('matrixRecordCount');
+      countEl.innerText = `อนุมัติแล้ว ${filteredDataset.length} รายการ (จากทั้งหมด ${rawDataset.length} แถวใน OT_Data)`;
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="p-8 text-center text-slate-400">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-60"></i>
+              <p>ไม่พบข้อมูลรายการ Approved ตามเงื่อนไขตัวกรอง</p>
+            </td>
+          </tr>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      // Unique distinct Centers, Months, and OT_Types present in filtered dataset
+      const centers = [...new Set(filteredDataset.map(d => d.Center))].sort();
+      const months = [...new Set(filteredDataset.map(d => d.Month))].sort();
+      const otTypes = [...new Set(filteredDataset.map(d => d.OT_Type))].sort();
+
+      // Aggregate Map: matrix[center][month][otType] = sum(CalculatedPrice)
+      const matrix = {};
+      const centerMonthSubtotals = {}; // [center][month]
+      const centerGrandTotals = {};    // [center]
+      const monthGrandTotals = {};     // [month]
+      let overallTotal = 0;
+
+      filteredDataset.forEach(row => {
+        const c = row.Center;
+        const m = row.Month;
+        const t = row.OT_Type;
+        const p = row.CalculatedPrice;
+
+        if (!matrix[c]) matrix[c] = {};
+        if (!matrix[c][m]) matrix[c][m] = {};
+        matrix[c][m][t] = (matrix[c][m][t] || 0) + p;
+
+        if (!centerMonthSubtotals[c]) centerMonthSubtotals[c] = {};
+        centerMonthSubtotals[c][m] = (centerMonthSubtotals[c][m] || 0) + p;
+
+        centerGrandTotals[c] = (centerGrandTotals[c] || 0) + p;
+        monthGrandTotals[m] = (monthGrandTotals[m] || 0) + p;
+        overallTotal += p;
+      });
+
+      // Build Table HTML Header
+      let html = '<thead class="bg-slate-100 text-slate-700 text-xs font-semibold border-b border-slate-200"><tr>';
+      html += '<th class="py-3 px-4 sticky left-0 bg-slate-100 z-10">ศูนย์บริการ (Center)</th>';
+      
+      if (showDetailedMatrix) {
+        html += '<th class="py-3 px-3 bg-slate-100">ประเภท OT</th>';
+      }
+
+      months.forEach(m => {
+        html += `<th class="py-3 px-4 text-right whitespace-nowrap">${escapeHtml(formatMonthName(m))}</th>`;
+      });
+      html += '<th class="py-3 px-4 text-right bg-slate-200/70 font-bold text-slate-800">รวมสุทธิ (Grand Total)</th>';
+      html += '</tr></thead><tbody class="divide-y divide-slate-100">';
+
+      // Build Table Body
+      centers.forEach(c => {
+        if (!showDetailedMatrix) {
+          // COMPACT VIEW: One row per Center, showing total per month
+          html += `<tr class="hover:bg-cyan-50/40 transition">`;
+          html += `<td class="py-3.5 px-4 font-semibold text-slate-800 sticky left-0 bg-white">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="building-2" class="w-4 h-4 text-cyan-600"></i>
+                      <span>${escapeHtml(c)}</span>
+                    </div>
+                   </td>`;
+
+          months.forEach(m => {
+            const val = (centerMonthSubtotals[c] && centerMonthSubtotals[c][m]) || 0;
+            html += `<td class="py-3.5 px-4 text-right font-medium ${val > 0 ? 'text-slate-800' : 'text-slate-300'}">
+                      ${val > 0 ? formatTHB(val) : '-'}
+                     </td>`;
+          });
+
+          const cTotal = centerGrandTotals[c] || 0;
+          html += `<td class="py-3.5 px-4 text-right font-bold text-cyan-900 bg-slate-50/70">${formatTHB(cTotal)}</td>`;
+          html += `</tr>`;
+        } else {
+          // DETAILED VIEW: Grouped by Center, with nested rows for each OT_Type
+          const centerTypes = otTypes.filter(t => {
+            return months.some(m => matrix[c] && matrix[c][m] && matrix[c][m][t]);
+          });
+
+          if (centerTypes.length === 0) return;
+
+          centerTypes.forEach((t, idx) => {
+            html += `<tr class="hover:bg-cyan-50/30 transition text-xs sm:text-sm">`;
+            if (idx === 0) {
+              html += `<td rowspan="${centerTypes.length + 1}" class="py-3 px-4 font-bold text-slate-900 sticky left-0 bg-slate-50 border-r border-slate-200 align-top">
+                        <div class="flex items-center gap-1.5 sticky top-12">
+                          <i data-lucide="building-2" class="w-4 h-4 text-cyan-600"></i>
+                          <span>${escapeHtml(c)}</span>
+                        </div>
+                       </td>`;
+            }
+            html += `<td class="py-2.5 px-3 text-slate-600 border-r border-slate-100 font-medium">
+                      <span class="inline-block w-1.5 h-1.5 rounded-full bg-cyan-500 mr-1.5"></span>
+                      ${escapeHtml(t)}
+                     </td>`;
+
+            let rowTypeTotal = 0;
+            months.forEach(m => {
+              const val = (matrix[c] && matrix[c][m] && matrix[c][m][t]) || 0;
+              rowTypeTotal += val;
+              html += `<td class="py-2.5 px-4 text-right ${val > 0 ? 'text-slate-800' : 'text-slate-300'}">
+                        ${val > 0 ? formatTHB(val) : '-'}
+                       </td>`;
+            });
+            html += `<td class="py-2.5 px-4 text-right font-semibold text-slate-800 bg-slate-50/50">${formatTHB(rowTypeTotal)}</td>`;
+            html += `</tr>`;
+          });
+
+          // Subtotal Row for this center
+          html += `<tr class="bg-cyan-50/60 font-semibold border-b-2 border-slate-200 text-xs sm:text-sm">`;
+          html += `<td class="py-2 px-3 text-cyan-900 font-bold border-r border-slate-200">รวมศูนย์ ${escapeHtml(c)}</td>`;
+          months.forEach(m => {
+            const sub = (centerMonthSubtotals[c] && centerMonthSubtotals[c][m]) || 0;
+            html += `<td class="py-2 px-4 text-right font-bold text-cyan-900">${formatTHB(sub)}</td>`;
+          });
+          html += `<td class="py-2 px-4 text-right font-bold text-cyan-950 bg-cyan-100/50">${formatTHB(centerGrandTotals[c] || 0)}</td>`;
+          html += `</tr>`;
+        }
+      });
+
+      // Grand Total Footer Row
+      html += `</tbody><tfoot class="bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-900 text-xs sm:text-sm">`;
+      html += `<tr>`;
+      html += `<td class="py-3.5 px-4 sticky left-0 bg-slate-100 text-slate-900 font-extrabold uppercase">รวมทุกศูนย์ (Grand Total)</td>`;
+      if (showDetailedMatrix) {
+        html += `<td class="py-3.5 px-3 bg-slate-100"></td>`;
+      }
+      months.forEach(m => {
+        const mTotal = monthGrandTotals[m] || 0;
+        html += `<td class="py-3.5 px-4 text-right text-cyan-800 font-extrabold">${formatTHB(mTotal)}</td>`;
+      });
+      html += `<td class="py-3.5 px-4 text-right font-extrabold text-emerald-800 bg-emerald-100/70 text-sm sm:text-base">${formatTHB(overallTotal)}</td>`;
+      html += `</tr></tfoot>`;
+
+      tbody.parentElement.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function toggleMatrixDetail(isDetailed) {
+      showDetailedMatrix = isDetailed;
+      document.getElementById('matrixCompactBtn').className = !isDetailed 
+        ? "px-3 py-1 rounded-md font-medium text-cyan-700 bg-cyan-50" 
+        : "px-3 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900";
+      document.getElementById('matrixDetailBtn').className = isDetailed 
+        ? "px-3 py-1 rounded-md font-medium text-cyan-700 bg-cyan-50" 
+        : "px-3 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900";
+      renderMatrixTable();
+    }
+
+    function renderRawTable() {
+      const tbody = document.getElementById('rawTableBody');
+      const pageInfo = document.getElementById('tablePageInfo');
+
+      pageInfo.innerText = `แสดง ${filteredDataset.length.toLocaleString()} จาก ${approvedDataset.length.toLocaleString()} รายการที่อนุมัติ`;
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-400">
+              ไม่พบข้อมูลที่ตรงกับเงื่อนไข
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Render rows (sorted by date descending)
+      const sorted = [...filteredDataset].sort((a, b) => (b.Date > a.Date ? 1 : -1));
+
+      tbody.innerHTML = sorted.map(row => {
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3 px-4 font-mono text-slate-600">${escapeHtml(row.Date)}</td>
+            <td class="py-3 px-4 font-medium text-slate-800">${escapeHtml(row.Center)}</td>
+            <td class="py-3 px-4">
+              <div class="font-medium text-slate-900">${escapeHtml(row.StaffName)}</div>
+              ${row.Note ? `<div class="text-[11px] text-slate-400 truncate max-w-xs">${escapeHtml(row.Note)}</div>` : ''}
+            </td>
+            <td class="py-3 px-4">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                ${escapeHtml(row.OT_Type)}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono">${row.Units}</td>
+            <td class="py-3 px-4 text-right font-semibold text-emerald-600 font-mono">${formatTHB(row.CalculatedPrice)}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                <i data-lucide="check" class="w-3 h-3 mr-1"></i> Approved
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderCharts() {
+      renderTrendChart();
+      renderPieChart();
+    }
+
+    function renderTrendChart() {
+      const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      const months = [...new Set(filteredDataset.map(d => d.Month))].sort();
+      const centers = [...new Set(filteredDataset.map(d => d.Center))].sort();
+
+      const palette = ['#0891b2', '#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+
+      const datasets = centers.map((center, index) => {
+        const color = palette[index % palette.length];
+        const data = months.map(month => {
+          return filteredDataset
+            .filter(d => d.Center === center && d.Month === month)
+            .reduce((sum, d) => sum + d.CalculatedPrice, 0);
+        });
+
+        return {
+          label: center,
+          data: data,
+          borderColor: color,
+          backgroundColor: color,
+          borderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: false,
+          tension: 0.2
+        };
+      });
+
+      trendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: months.map(m => formatMonthName(m)),
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: ${formatTHB(ctx.raw)}`
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (val) => '฿' + (val >= 1000 ? (val / 1000) + 'k' : val)
+              },
+              grid: { color: '#f1f5f9' }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderPieChart() {
+      const ctx = document.getElementById('otTypePieChart').getContext('2d');
+      if (pieChartInstance) pieChartInstance.destroy();
+
+      const typeMap = {};
+      filteredDataset.forEach(d => {
+        typeMap[d.OT_Type] = (typeMap[d.OT_Type] || 0) + d.CalculatedPrice;
+      });
+
+      const labels = Object.keys(typeMap);
+      const data = Object.values(typeMap);
+      const colors = ['#0891b2', '#0284c7', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'];
+
+      pieChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 10, padding: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const total = data.reduce((a, b) => a + b, 0);
+                  const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : 0;
+                  return ` ${ctx.label}: ${formatTHB(ctx.raw)} (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    async function fetchLiveGoogleSheet(url) {
+      if (!url) return false;
+      const refreshIcon = document.getElementById('refreshIcon');
+      refreshIcon.classList.add('animate-spin');
+
+      try {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const csvText = await response.text();
+        const parsed = parseCSV(csvText);
+        if (parsed.length > 0) {
+          rawDataset = normalizeData(parsed);
+          processAndFilterData();
+          updateSyncIndicator(true);
+          showToast(`ซิงค์ข้อมูลเรียลไทม์สำเร็จ (${rawDataset.length} แถว)`, 'success');
+          return true;
+        } else {
+          throw new Error('ไม่พบแถวข้อมูลในชีต');
+        }
+      } catch (err) {
+        console.error('Fetch Google Sheet failed:', err);
+        updateSyncIndicator(false);
+        showToast(`ซิงค์ไม่สำเร็จ: ${err.message}`, 'error');
+        return false;
+      } finally {
+        refreshIcon.classList.remove('animate-spin');
+      }
+    }
+
+    function triggerRefresh() {
+      const savedUrl = localStorage.getItem('ot_lasik_sheet_url');
+      if (savedUrl) {
+        fetchLiveGoogleSheet(savedUrl);
+      } else {
+        // Soft refresh with current loaded data
+        processAndFilterData();
+        updateSyncIndicator(true);
+        showToast('อัปเดตและคำนวณข้อมูลเรียบร้อย', 'success');
+      }
+    }
+
+    function updateSyncIndicator(isSuccess) {
+      const ind = document.getElementById('syncIndicator');
+      const txt = document.getElementById('lastSyncText');
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      if (isSuccess) {
+        ind.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
+        txt.innerText = `อัปเดต: ${timeStr}`;
+      } else {
+        ind.className = "w-2 h-2 rounded-full bg-rose-500";
+        txt.innerText = `การเชื่อมต่อขัดข้อง (${timeStr})`;
+      }
+    }
+
+    function setupAutoRefresh(intervalMs) {
+      if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+      }
+      const ms = parseInt(intervalMs, 10);
+      if (ms > 0) {
+        autoRefreshTimer = setInterval(() => {
+          triggerRefresh();
+        }, ms);
+      }
+    }
+
+    function openConfigModal() {
+      const savedUrl = localStorage.getItem('ot_lasik_sheet_url') || '';
+      const savedInterval = localStorage.getItem('ot_lasik_refresh_interval') || '30000';
+      document.getElementById('sheetCsvUrlInput').value = savedUrl;
+      document.getElementById('autoRefreshInterval').value = savedInterval;
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    function saveAndApplyConfig() {
+      const url = document.getElementById('sheetCsvUrlInput').value.trim();
+      const interval = document.getElementById('autoRefreshInterval').value;
+
+      localStorage.setItem('ot_lasik_sheet_url', url);
+      localStorage.setItem('ot_lasik_refresh_interval', interval);
+
+      setupAutoRefresh(interval);
+      closeConfigModal();
+
+      if (url) {
+        fetchLiveGoogleSheet(url);
+      } else {
+        showToast('บันทึกการตั้งค่าแล้ว (ใช้โหมด In-memory Data)', 'info');
+      }
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const parsed = parseCSV(text);
+        if (parsed.length > 0) {
+          rawDataset = normalizeData(parsed);
+          processAndFilterData();
+          closeConfigModal();
+          showToast(`นำเข้าไฟล์สำเร็จ ${rawDataset.length} รายการ`, 'success');
+        } else {
+          showToast('ไม่พบข้อมูลที่ถูกต้องในไฟล์ CSV', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleDefaultData() {
+      rawDataset = normalizeData(DEFAULT_LASIK_OT_DATA);
+      processAndFilterData();
+      closeConfigModal();
+      showToast('โหลดข้อมูลตัวอย่างสำเร็จ (แสดงเฉพาะ Approved เท่านั้น)', 'success');
+    }
+
+    function exportToCSV() {
+      if (filteredDataset.length === 0) {
+        showToast('ไม่มีข้อมูลสำหรับส่งออก', 'info');
+        return;
+      }
+
+      const headers = ["ID", "Date", "Month", "Center", "StaffName", "OT_Type", "Units", "CalculatedPrice", "Status", "Note"];
+      const rows = filteredDataset.map(r => [
+        r.ID,
+        r.Date,
+        r.Month,
+        `"${r.Center.replace(/"/g, '""')}"`,
+        `"${r.StaffName.replace(/"/g, '""')}"`,
+        `"${r.OT_Type.replace(/"/g, '""')}"`,
+        r.Units,
+        r.CalculatedPrice,
+        r.Status,
+        `"${(r.Note || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `OT_Lasik_Approved_Summary_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('ส่งออกไฟล์ CSV สำเร็จ', 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMessage.innerText = message;
+
+      if (type === 'success') {
+        toastIcon.className = 'text-emerald-400';
+        toastIcon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+      } else if (type === 'error') {
+        toastIcon.className = 'text-rose-400';
+        toastIcon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+      } else {
+        toastIcon.className = 'text-cyan-400';
+        toastIcon.innerHTML = '<i data-lucide="info" class="w-5 h-5"></i>';
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.onload = function() {
+      lucide.createIcons();
+
+      // Check if user previously saved a live Google Sheet URL
+      const savedUrl = localStorage.getItem('ot_lasik_sheet_url');
+      const savedInterval = localStorage.getItem('ot_lasik_refresh_interval') || '30000';
+
+      if (savedUrl) {
+        fetchLiveGoogleSheet(savedUrl);
+      } else {
+        // Initialize with default Lasik operations dataset
+        rawDataset = normalizeData(DEFAULT_LASIK_OT_DATA);
+        processAndFilterData();
+      }
+
+      setupAutoRefresh(savedInterval);
+    };
+  </script>
+</body>
+</html>
