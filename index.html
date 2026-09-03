@@ -653,22 +653,76 @@
     function getRowVal(r, keys) {
       for (const k of keys) {
         for (const rowKey of Object.keys(r)) {
-          if (rowKey.trim().toLowerCase() === k.toLowerCase()) {
-            return r[rowKey];
+          const cleanRowKey = rowKey.trim().toLowerCase().replace(/[\s_\-\/]/g, '');
+          const cleanTargetKey = k.trim().toLowerCase().replace(/[\s_\-\/]/g, '');
+          if (cleanRowKey === cleanTargetKey) {
+            const val = r[rowKey];
+            if (val !== undefined && val !== null && String(val).trim() !== '') {
+              return val;
+            }
           }
         }
       }
       return undefined;
     }
 
+    // Comprehensive Center extractor: checks exact matches and loose matching
+    function extractCenterValue(r) {
+      const targetKeys = [
+        'Center', 'center', 'CENTER', 'Center Name', 'CenterName', 'Center_Name', 
+        'Center / สาขา', 'ศูนย์ / สาขา', 'ศูนย์', 'สาขา', 'ชื่อศูนย์', 'ชื่อสาขา', 
+        'ศูนย์บริการ', 'ศูนย์เลสิก', 'Hospital', 'Branch', 'Location', 'Site', 'Department', 'หน่วยงาน'
+      ];
+      
+      let val = getRowVal(r, targetKeys);
+      if (val) return String(val).trim();
+
+      // Fallback: search any column key that contains 'center', 'ศูนย์', or 'สาขา'
+      for (const k of Object.keys(r)) {
+        const lk = k.toLowerCase();
+        if (lk.includes('center') || lk.includes('ศูนย์') || lk.includes('สาขา')) {
+          const v = r[k];
+          if (v !== undefined && v !== null && String(v).trim() !== '') {
+            return String(v).trim();
+          }
+        }
+      }
+      return '';
+    }
+
+    // Helper to determine Approved status with high tolerance
+    function isApprovedStatus(statusVal) {
+      if (!statusVal) return false;
+      const s = String(statusVal).toLowerCase().trim();
+      return (
+        s === 'approved' ||
+        s === 'approve' ||
+        s.startsWith('approv') ||
+        s.includes('อนุมัติ') ||
+        s === 'ผ่าน' ||
+        s === 'pass' ||
+        s === 'yes'
+      );
+    }
+
     // Standardize heterogeneous sheet column names
     function normalizeRecords(rows) {
+      let lastValidCenter = ''; // For Auto Fill-Down if cells are merged in Google Sheets
+
       return rows.map((r, i) => {
         // Status resolution (Supports English 'Approved' and Thai 'อนุมัติ')
-        const status = (getRowVal(r, ['Status', 'สถานะ']) || 'Pending').toString().trim();
+        const rawStatus = getRowVal(r, ['Status', 'สถานะ', 'State', 'Approval', 'Approve_Status']) || 'Pending';
+        const status = String(rawStatus).trim();
 
-        // Center / Branch
-        const center = (getRowVal(r, ['Center', 'Branch', 'ศูนย์', 'สาขา', 'ศูนย์เลสิก']) || 'ไม่ระบุศูนย์').toString().trim();
+        // Center / Branch resolution with Fill-Down for merged cells
+        let center = extractCenterValue(r);
+        if (center) {
+          lastValidCenter = center;
+        } else if (lastValidCenter) {
+          center = lastValidCenter; // Inherit from merged parent row
+        } else {
+          center = 'ไม่ระบุศูนย์';
+        }
 
         // OT_Type
         const otType = (getRowVal(r, ['OT_Type', 'OtType', 'Procedure', 'ประเภทOT', 'ประเภท']) || 'General OT').toString().trim();
@@ -710,11 +764,7 @@
     function processApprovedData() {
       // MANDATORY CRITERIA:
       // ดึงข้อมูลเฉพาะ Approved ของคอลัม Status เท่านั้น
-      approvedRecords = masterDataset.filter(row => {
-        if (!row.Status) return false;
-        const s = row.Status.toLowerCase().trim();
-        return s === 'approved' || s === 'อนุมัติ' || s === 'อนุมัติแล้ว';
-      });
+      approvedRecords = masterDataset.filter(row => isApprovedStatus(row.Status));
 
       populateFilterSelects();
       applyFilters();
@@ -729,369 +779,43 @@
       const curMonth = monthSelect.value;
       const curOtType = otTypeSelect.value;
 
-      const centers = [...new Set(approvedRecords.map(d => d.Center))].sort();
-      const months = [...new Set(approvedRecords.map(d => d.Month))].sort();
-      const otTypes = [...new Set(approvedRecords.map(d => d.OT_Type))].sort();
+      // Extract unique values from approved records
+      const centers = [...new Set(approvedRecords.map(d => d.Center).filter(c => c && c.trim() !== ''))].sort();
+      const months = [...new Set(approvedRecords.map(d => d.Month).filter(m => m && m.trim() !== ''))].sort();
+      const otTypes = [...new Set(approvedRecords.map(d => d.OT_Type).filter(t => t && t.trim() !== ''))].sort();
 
+      // Populate Centers Dropdown
       centerSelect.innerHTML = '<option value="ALL">ทุกศูนย์บริการ (All Centers)</option>';
       centers.forEach(c => {
-        centerSelect.innerHTML += `<option value="${sanitizeText(c)}">${sanitizeText(c)}</option>`;
+        const count = approvedRecords.filter(r => r.Center === c).length;
+        centerSelect.innerHTML += `<option value="${sanitizeText(c)}">${sanitizeText(c)} (${count})</option>`;
       });
-      if (centers.includes(curCenter)) centerSelect.value = curCenter;
+      if (curCenter && (curCenter === 'ALL' || centers.includes(curCenter))) {
+        centerSelect.value = curCenter;
+      } else {
+        centerSelect.value = 'ALL';
+      }
 
+      // Populate Months Dropdown
       monthSelect.innerHTML = '<option value="ALL">ทุกเดือน (All Months)</option>';
       months.forEach(m => {
         monthSelect.innerHTML += `<option value="${sanitizeText(m)}">${sanitizeText(formatMonthTh(m))}</option>`;
       });
-      if (months.includes(curMonth)) monthSelect.value = curMonth;
+      if (curMonth && (curMonth === 'ALL' || months.includes(curMonth))) {
+        monthSelect.value = curMonth;
+      } else {
+        monthSelect.value = 'ALL';
+      }
 
+      // Populate OT Types Dropdown
       otTypeSelect.innerHTML = '<option value="ALL">ทุกประเภทหัตถการ (All Types)</option>';
       otTypes.forEach(t => {
         otTypeSelect.innerHTML += `<option value="${sanitizeText(t)}">${sanitizeText(t)}</option>`;
       });
-      if (otTypes.includes(curOtType)) otTypeSelect.value = curOtType;
-    }
-
-    function applyFilters() {
-      const center = document.getElementById('filterCenter').value;
-      const month = document.getElementById('filterMonth').value;
-      const otType = document.getElementById('filterOtType').value;
-      const q = (document.getElementById('filterKeyword').value || '').trim().toLowerCase();
-
-      filteredRecords = approvedRecords.filter(row => {
-        if (center !== 'ALL' && row.Center !== center) return false;
-        if (month !== 'ALL' && row.Month !== month) return false;
-        if (otType !== 'ALL' && row.OT_Type !== otType) return false;
-        if (q) {
-          const matchStaff = row.StaffName.toLowerCase().includes(q);
-          const matchNote = row.Note.toLowerCase().includes(q);
-          const matchId = row.ID.toLowerCase().includes(q);
-          if (!matchStaff && !matchNote && !matchId) return false;
-        }
-        return true;
-      });
-
-      renderKPIs();
-      renderMatrixTable();
-      renderCharts();
-      renderRawTable();
-    }
-
-    function resetFilters() {
-      document.getElementById('filterCenter').value = 'ALL';
-      document.getElementById('filterMonth').value = 'ALL';
-      document.getElementById('filterOtType').value = 'ALL';
-      document.getElementById('filterKeyword').value = '';
-      applyFilters();
-      showToastNotification('ล้างตัวกรองข้อมูลเรียบร้อย', 'info');
-    }
-
-    function renderKPIs() {
-      const totalAmount = filteredRecords.reduce((sum, r) => sum + r.CalculatedPrice, 0);
-      const totalCases = filteredRecords.length;
-      const avg = totalCases > 0 ? totalAmount / totalCases : 0;
-
-      document.getElementById('kpiTotalApproved').innerText = formatTHB(totalAmount);
-      document.getElementById('kpiTotalCases').innerText = totalCases.toLocaleString('th-TH');
-      document.getElementById('kpiAveragePerCase').innerText = `เฉลี่ย ${formatTHB(avg)} / รายการ`;
-
-      // Top Center
-      const centerTotals = {};
-      filteredRecords.forEach(r => {
-        centerTotals[r.Center] = (centerTotals[r.Center] || 0) + r.CalculatedPrice;
-      });
-      let topC = '-';
-      let topCVal = 0;
-      Object.entries(centerTotals).forEach(([c, val]) => {
-        if (val > topCVal) {
-          topCVal = val;
-          topC = c;
-        }
-      });
-      const topCPct = totalAmount > 0 ? ((topCVal / totalAmount) * 100).toFixed(1) : 0;
-      document.getElementById('kpiTopCenter').innerText = topC;
-      document.getElementById('kpiTopCenterAmount').innerText = `${formatTHB(topCVal)} (${topCPct}% ของยอดรวม)`;
-
-      // Top OT Type
-      const typeTotals = {};
-      filteredRecords.forEach(r => {
-        typeTotals[r.OT_Type] = (typeTotals[r.OT_Type] || 0) + r.CalculatedPrice;
-      });
-      let topT = '-';
-      let topTVal = 0;
-      Object.entries(typeTotals).forEach(([t, val]) => {
-        if (val > topTVal) {
-          topTVal = val;
-          topT = t;
-        }
-      });
-      document.getElementById('kpiTopOtType').innerText = topT;
-      document.getElementById('kpiTopOtTypeAmount').innerText = formatTHB(topTVal);
-    }
-
-    function renderMatrixTable() {
-      const thead = document.getElementById('matrixHead');
-      const tbody = document.getElementById('matrixBody');
-      const tfoot = document.getElementById('matrixFoot');
-      const stats = document.getElementById('matrixRecordStats');
-
-      stats.innerText = `อนุมัติแล้ว ${filteredRecords.length.toLocaleString('th-TH')} รายการ (จากข้อมูลทั้งหมด ${masterDataset.length} รายการ)`;
-
-      if (filteredRecords.length === 0) {
-        thead.innerHTML = '';
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="10" class="p-10 text-center text-slate-400">
-              <i data-lucide="filter-x" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
-              <p class="font-medium text-slate-500">ไม่พบรายการ Approved ตามตัวกรองที่เลือก</p>
-            </td>
-          </tr>
-        `;
-        tfoot.innerHTML = '';
-        lucide.createIcons();
-        return;
-      }
-
-      const centers = [...new Set(filteredRecords.map(d => d.Center))].sort();
-      const months = [...new Set(filteredRecords.map(d => d.Month))].sort();
-      const otTypes = [...new Set(filteredRecords.map(d => d.OT_Type))].sort();
-
-      // Multi-dimensional aggregations
-      const matrix = {};
-      const centerMonthSums = {};
-      const centerTotals = {};
-      const monthTotals = {};
-      let grandTotal = 0;
-
-      filteredRecords.forEach(row => {
-        const c = row.Center;
-        const m = row.Month;
-        const t = row.OT_Type;
-        const p = row.CalculatedPrice;
-
-        if (!matrix[c]) matrix[c] = {};
-        if (!matrix[c][m]) matrix[c][m] = {};
-        matrix[c][m][t] = (matrix[c][m][t] || 0) + p;
-
-        if (!centerMonthSums[c]) centerMonthSums[c] = {};
-        centerMonthSums[c][m] = (centerMonthSums[c][m] || 0) + p;
-
-        centerTotals[c] = (centerTotals[c] || 0) + p;
-        monthTotals[m] = (monthTotals[m] || 0) + p;
-        grandTotal += p;
-      });
-
-      // Thead
-      let headHtml = `<tr><th class="py-3.5 px-4 sticky left-0 bg-slate-50 z-20 border-r border-slate-200/80 font-bold text-slate-800">ศูนย์บริการ (Center)</th>`;
-      if (isDetailedMatrix) {
-        headHtml += `<th class="py-3.5 px-3 bg-slate-50 font-bold text-slate-800 border-r border-slate-200/80">ประเภท OT (OT_Type)</th>`;
-      }
-      months.forEach(m => {
-        headHtml += `<th class="py-3.5 px-4 text-right whitespace-nowrap font-bold text-slate-800">${sanitizeText(formatMonthTh(m))}</th>`;
-      });
-      headHtml += `<th class="py-3.5 px-4 text-right bg-slate-100 font-extrabold text-teal-900">รวมสุทธิ (Grand Total)</th></tr>`;
-      thead.innerHTML = headHtml;
-
-      // Tbody
-      let bodyHtml = '';
-      centers.forEach(c => {
-        if (!isDetailedMatrix) {
-          // COMPACT VIEW: Center x Month
-          bodyHtml += `<tr class="hover:bg-teal-50/40 transition">`;
-          bodyHtml += `<td class="py-3.5 px-4 font-semibold text-slate-900 sticky left-0 bg-white border-r border-slate-100">
-                        <div class="flex items-center gap-2">
-                          <i data-lucide="building" class="w-4 h-4 text-teal-600"></i>
-                          <span>${sanitizeText(c)}</span>
-                        </div>
-                       </td>`;
-          months.forEach(m => {
-            const val = (centerMonthSums[c] && centerMonthSums[c][m]) || 0;
-            bodyHtml += `<td class="py-3.5 px-4 text-right font-medium ${val > 0 ? 'text-slate-800' : 'text-slate-300'}">
-                          ${val > 0 ? formatTHB(val) : '-'}
-                         </td>`;
-          });
-          bodyHtml += `<td class="py-3.5 px-4 text-right font-bold text-teal-900 bg-teal-50/40">${formatTHB(centerTotals[c] || 0)}</td>`;
-          bodyHtml += `</tr>`;
-        } else {
-          // DETAILED VIEW: Center with nested OT_Type rows
-          const centerTypes = otTypes.filter(t => months.some(m => matrix[c] && matrix[c][m] && matrix[c][m][t]));
-          if (centerTypes.length === 0) return;
-
-          centerTypes.forEach((t, idx) => {
-            bodyHtml += `<tr class="hover:bg-slate-50 transition">`;
-            if (idx === 0) {
-              bodyHtml += `<td rowspan="${centerTypes.length + 1}" class="py-3.5 px-4 font-bold text-slate-900 sticky left-0 bg-slate-50/80 border-r border-slate-200 align-top">
-                            <div class="sticky top-20 flex items-center gap-2">
-                              <i data-lucide="building" class="w-4 h-4 text-teal-600"></i>
-                              <span>${sanitizeText(c)}</span>
-                            </div>
-                           </td>`;
-            }
-            bodyHtml += `<td class="py-2.5 px-3 text-slate-700 border-r border-slate-100 font-medium">
-                          <span class="inline-block w-1.5 h-1.5 rounded-full bg-teal-500 mr-2"></span>
-                          ${sanitizeText(t)}
-                         </td>`;
-            let typeRowSum = 0;
-            months.forEach(m => {
-              const val = (matrix[c] && matrix[c][m] && matrix[c][m][t]) || 0;
-              typeRowSum += val;
-              bodyHtml += `<td class="py-2.5 px-4 text-right ${val > 0 ? 'text-slate-800 font-medium' : 'text-slate-300'}">
-                            ${val > 0 ? formatTHB(val) : '-'}
-                           </td>`;
-            });
-            bodyHtml += `<td class="py-2.5 px-4 text-right font-semibold text-slate-800 bg-slate-50/60">${formatTHB(typeRowSum)}</td>`;
-            bodyHtml += `</tr>`;
-          });
-
-          // Center Subtotal
-          bodyHtml += `<tr class="bg-teal-50/50 font-semibold border-b-2 border-slate-200">`;
-          bodyHtml += `<td class="py-2.5 px-3 text-teal-900 font-bold border-r border-slate-200">รวมศูนย์ ${sanitizeText(c)}</td>`;
-          months.forEach(m => {
-            const sub = (centerMonthSums[c] && centerMonthSums[c][m]) || 0;
-            bodyHtml += `<td class="py-2.5 px-4 text-right font-bold text-teal-900">${formatTHB(sub)}</td>`;
-          });
-          bodyHtml += `<td class="py-2.5 px-4 text-right font-extrabold text-teal-950 bg-teal-100/60">${formatTHB(centerTotals[c] || 0)}</td>`;
-          bodyHtml += `</tr>`;
-        }
-      });
-      tbody.innerHTML = bodyHtml;
-
-      // Tfoot Grand Total
-      let footHtml = `<tr><td class="py-3.5 px-4 sticky left-0 bg-slate-100 text-slate-900 font-bold uppercase border-r border-slate-200">รวมทุกศูนย์ (Grand Total)</td>`;
-      if (isDetailedMatrix) {
-        footHtml += `<td class="py-3.5 px-3 bg-slate-100 border-r border-slate-200"></td>`;
-      }
-      months.forEach(m => {
-        footHtml += `<td class="py-3.5 px-4 text-right text-teal-800 font-bold">${formatTHB(monthTotals[m] || 0)}</td>`;
-      });
-      footHtml += `<td class="py-3.5 px-4 text-right font-extrabold text-emerald-800 bg-emerald-100 text-sm sm:text-base">${formatTHB(grandTotal)}</td></tr>`;
-      tfoot.innerHTML = footHtml;
-
-      lucide.createIcons();
-    }
-
-    function toggleMatrixView(isDetailed) {
-      isDetailedMatrix = isDetailed;
-      const compactBtn = document.getElementById('matrixCompactBtn');
-      const detailBtn = document.getElementById('matrixDetailBtn');
-
-      if (!isDetailed) {
-        compactBtn.className = "px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition";
-        detailBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
+      if (curOtType && (curOtType === 'ALL' || otTypes.includes(curOtType))) {
+        otTypeSelect.value = curOtType;
       } else {
-        compactBtn.className = "px-3 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition";
-        detailBtn.className = "px-3 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition";
-      }
-      renderMatrixTable();
-    }
-
-    function renderCharts() {
-      // Monthly Trend Chart
-      const trendCanvas = document.getElementById('monthlyTrendChart');
-      if (trendCanvas) {
-        const ctx = trendCanvas.getContext('2d');
-        if (trendChartInstance) trendChartInstance.destroy();
-
-        const months = [...new Set(filteredRecords.map(d => d.Month))].sort();
-        const centers = [...new Set(filteredRecords.map(d => d.Center))].sort();
-        const colors = ['#0d9488', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-
-        const datasets = centers.map((c, i) => {
-          const clr = colors[i % colors.length];
-          const data = months.map(m => {
-            return filteredRecords
-              .filter(r => r.Center === c && r.Month === m)
-              .reduce((sum, r) => sum + r.CalculatedPrice, 0);
-          });
-          return {
-            label: c,
-            data: data,
-            borderColor: clr,
-            backgroundColor: clr,
-            borderWidth: 2.5,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.25
-          };
-        });
-
-        trendChartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: months.map(m => formatMonthTh(m)),
-            datasets: datasets
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'top',
-                labels: { font: { family: 'Prompt', size: 12 }, boxWidth: 12 }
-              },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ` ${ctx.dataset.label}: ${formatTHB(ctx.raw)}`
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  callback: (val) => '฿' + (val >= 1000 ? (val / 1000) + 'k' : val)
-                },
-                grid: { color: '#f1f5f9' }
-              },
-              x: { grid: { display: false } }
-            }
-          }
-        });
-      }
-
-      // OT_Type Doughnut Chart
-      const pieCanvas = document.getElementById('otTypeDoughnutChart');
-      if (pieCanvas) {
-        const ctx = pieCanvas.getContext('2d');
-        if (doughnutChartInstance) doughnutChartInstance.destroy();
-
-        const typeMap = {};
-        filteredRecords.forEach(r => {
-          typeMap[r.OT_Type] = (typeMap[r.OT_Type] || 0) + r.CalculatedPrice;
-        });
-
-        const labels = Object.keys(typeMap);
-        const values = Object.values(typeMap);
-        const palette = ['#0d9488', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#64748b', '#06b6d4'];
-
-        doughnutChartInstance = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: values,
-              backgroundColor: palette.slice(0, labels.length),
-              borderWidth: 3,
-              borderColor: '#ffffff'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: { font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
-              },
-              tooltip: {
-                callbacks: {
-                  label: (c) => ` ${c.label}: ${formatTHB(c.raw)}`
-                }
-              }
-            },
-            cutout: '68%'
-          }
-        });
+        otTypeSelect.value = 'ALL';
       }
     }
 
@@ -1151,21 +875,39 @@
         return;
       }
       try {
-        const cols = response.table.cols.map(c => (c && c.label) ? c.label.trim() : '');
-        const rows = response.table.rows.map(r => {
-          const item = {};
-          r.c.forEach((cell, idx) => {
-            const colName = cols[idx] || `col_${idx}`;
-            item[colName] = (cell && cell.v !== null && cell.v !== undefined) ? cell.v : (cell ? cell.f || '' : '');
-            if (cell && cell.f) {
-              item[`${colName}_formatted`] = cell.f;
+        let cols = response.table.cols.map(c => (c && c.label) ? c.label.trim() : '');
+        let rows = response.table.rows || [];
+
+        // Check if GViz placed headers in row 0 instead of response.table.cols
+        const colsAreEmpty = cols.every(c => !c || c.startsWith('col_') || /^[A-Z]+$/.test(c));
+        if (colsAreEmpty && rows.length > 0) {
+          const rowZero = rows[0];
+          if (rowZero && rowZero.c) {
+            const candidateCols = rowZero.c.map(cell => (cell && (cell.v !== null && cell.v !== undefined) ? String(cell.v).trim() : ''));
+            const isHeaderRow = candidateCols.some(h => /center|ศูนย์|date|วันที่|status|สถานะ|price|ot/i.test(h));
+            if (isHeaderRow) {
+              cols = candidateCols;
+              rows = rows.slice(1); // Row 0 is consumed as header
             }
-          });
+          }
+        }
+
+        const parsedRows = rows.map(r => {
+          const item = {};
+          if (r && r.c) {
+            r.c.forEach((cell, idx) => {
+              const colName = cols[idx] || `col_${idx}`;
+              item[colName] = (cell && cell.v !== null && cell.v !== undefined) ? cell.v : (cell ? cell.f || '' : '');
+              if (cell && cell.f) {
+                item[`${colName}_formatted`] = cell.f;
+              }
+            });
+          }
           return item;
         });
 
-        if (rows.length > 0) {
-          masterDataset = normalizeRecords(rows);
+        if (parsedRows.length > 0) {
+          masterDataset = normalizeRecords(parsedRows);
           processApprovedData();
           setConnectionStatus(true, `ซิงค์สด (${approvedRecords.length} Approved)`);
           showToastNotification(`ซิงค์ข้อมูลเรียลไทม์จาก Google Sheet สำเร็จ`, 'success');
@@ -1184,7 +926,8 @@
         const script = document.createElement('script');
         script.id = 'gviz-jsonp-script';
         const encTab = encodeURIComponent(tabName);
-        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encTab}&tqx=responseHandler:googleSheetsCallback&tq=`;
+        // Explicitly pass headers=1 to ensure Google Sheets treats row 1 as column labels
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encTab}&headers=1&tqx=responseHandler:googleSheetsCallback&tq=`;
 
         const timer = setTimeout(() => {
           script.remove();
