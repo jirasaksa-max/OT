@@ -356,9 +356,13 @@
               <span class="w-3 h-3 rounded-md bg-[#f59e0b]"></span>
               <span class="font-normal text-slate-700 text-xs">Holiday (วันหยุด / นักขัตฤกษ์)</span>
             </div>
-            <div class="flex items-center gap-1.5 text-slate-400 text-[11px]">
-              <span class="w-3 h-0.5 bg-slate-400"></span>
-              <span>เส้นชี้ป้ายยอดรวมด้านบน</span>
+            <div class="flex items-center gap-1.5 text-slate-500 text-[11px]">
+              <span class="w-2.5 h-2.5 rounded-full border-2 border-teal-600 bg-white inline-block"></span>
+              <span>Label แต่ละประเภทด้านบน</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-slate-500 text-[11px]">
+              <span class="px-1.5 py-0.5 rounded bg-slate-100 font-semibold text-[10px] text-slate-700">รวม</span>
+              <span>ป้ายรวมท้ายแท่ง</span>
             </div>
           </div>
           <span id="centerBarTotalSummary" class="font-medium text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-md text-[11px]">
@@ -382,13 +386,20 @@
             <div>
               <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                 <i data-lucide="trending-up" class="w-3.5 h-3.5 text-teal-600"></i>
-                <span>แนวโน้มยอดเบิก OT รายเดือนตามศูนย์</span>
+                <span>แนวโน้มยอดเบิก OT รายเดือน</span>
               </h3>
-              <p class="text-[11px] text-slate-500">เปรียบเทียบมูลค่าเบิกจ่ายจริงแต่ละสาขา</p>
+              <p class="text-[11px] text-slate-500">เปรียบเทียบมูลค่าเบิกจ่ายจริงตามช่วงเวลา</p>
             </div>
-            <span class="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-              บาท (THB)
-            </span>
+            
+            <!-- Trend View Switcher -->
+            <div class="inline-flex rounded-xl border border-slate-200 bg-slate-100/90 p-0.5 text-xs">
+              <button id="trendModeTotalBtn" onclick="toggleTrendMode('total')" class="px-2.5 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition text-[11px]">
+                ภาพรวม
+              </button>
+              <button id="trendModeCenterBtn" onclick="toggleTrendMode('center')" class="px-2.5 py-1 rounded-lg font-normal text-slate-600 hover:text-slate-900 transition text-[11px]">
+                แยกตามศูนย์
+              </button>
+            </div>
           </div>
           <div class="relative w-full h-[180px] sm:h-[200px] mt-2">
             <canvas id="monthlyTrendChart"></canvas>
@@ -403,7 +414,7 @@
                 <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-teal-600"></i>
                 <span>สัดส่วนตามประเภทหัตถการ OT</span>
               </h3>
-              <p class="text-[11px] text-slate-500">จำแนกตามมูลค่าและจำนวนเคส</p>
+              <p class="text-[11px] text-slate-500">จำแนกตามมูลค่าและจำนวนเคส (มีเส้นโยงระบุตัวเลขชัดเจน)</p>
             </div>
             <span id="doughnutTotalBadge" class="text-[10px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
               0 เคส
@@ -543,6 +554,9 @@
 
     // Horizontal Bar Chart Mode: 'amount' or 'cases'
     let hbarDisplayMode = 'amount';
+
+    // Monthly Trend Chart Mode: 'total' (aggregate overview) or 'center' (by center)
+    let trendDisplayMode = 'total';
 
     // Helpers
     function formatTHB(amount) {
@@ -1025,17 +1039,45 @@
       renderCenterHorizontalBarChart();
     }
 
-    // Custom Chart.js Plugin: Draws Elegant Total Label & Pointer Line Above Each Horizontal Stacked Bar
+    // Toggle between Total vs By Center in Monthly Trend Chart
+    function toggleTrendMode(mode) {
+      trendDisplayMode = mode;
+      const totalBtn = document.getElementById('trendModeTotalBtn');
+      const centerBtn = document.getElementById('trendModeCenterBtn');
+      const activeClass = "px-2.5 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition text-[11px]";
+      const inactiveClass = "px-2.5 py-1 rounded-lg font-normal text-slate-600 hover:text-slate-900 transition text-[11px]";
+
+      if (totalBtn) totalBtn.className = (mode === 'total') ? activeClass : inactiveClass;
+      if (centerBtn) centerBtn.className = (mode === 'center') ? activeClass : inactiveClass;
+
+      renderCharts();
+    }
+
+    // Helper: Draw rounded rectangle path
+    function drawRoundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    // Custom Chart.js Plugin: Draws Category Callouts above each bar segment AND Grand Total Pill at the end of the bar
     const centerCalloutPointerPlugin = {
       id: 'centerCalloutPointerPlugin',
       afterDatasetsDraw(chart) {
         const { ctx, scales: { x, y } } = chart;
-        const meta0 = chart.getDatasetMeta(0);
-        const meta1 = chart.getDatasetMeta(1);
+        const meta0 = chart.getDatasetMeta(0); // Overtime
+        const meta1 = chart.getDatasetMeta(1); // Holiday
         if (!meta0 || !meta1 || !meta0.data.length) return;
 
         ctx.save();
-        ctx.font = '500 11px Kanit, sans-serif';
 
         meta0.data.forEach((bar0, idx) => {
           const bar1 = meta1.data[idx];
@@ -1055,91 +1097,144 @@
 
           // Bar geometry
           const yCenter = bar0.y;
-          const barHeight = bar0.height || 22;
+          const barHeight = bar0.height || 20;
           const yBarTop = yCenter - barHeight / 2;
 
-          // Rightmost coordinate of the stacked bar
-          const x0End = bar0.x;
-          const x1End = bar1.x;
-          const xRightEnd = Math.max(x0End, x1End);
+          // Segment coordinates (stacked: X starts at xBase, 0 -> bar0.x -> bar1.x)
           const xBase = x.getPixelForValue(0);
+          const xOtEnd = bar0.x;
+          const xHolEnd = bar1.x;
 
-          // Pointer Anchor point on the bar
-          const xAnchor = Math.max(xBase + 24, Math.min(xBase + (xRightEnd - xBase) * 0.45, xRightEnd - 12));
+          // 1. Draw Overtime Category Label ABOVE the Overtime segment (if active)
+          if (otRecs.length > 0 || otSum > 0) {
+            const segWidth = Math.abs(xOtEnd - xBase);
+            if (segWidth > 14) {
+              const xOtAnchor = xBase + (segWidth * 0.5);
+              const otText = (hbarDisplayMode === 'amount')
+                ? `OT: ${formatShortTHB(otSum)} (${otRecs.length})`
+                : `OT: ${otRecs.length} เคส`;
 
-          // Label content
-          let mainText = '';
-          let subText = '';
-          if (hbarDisplayMode === 'amount') {
-            mainText = `รวม ${formatTHB(totalSum)} (${totalCases} เคส)`;
-            subText = `OT: ${formatShortTHB(otSum)} (${otRecs.length}) | Hol: ${formatShortTHB(holSum)} (${holRecs.length})`;
-          } else {
-            mainText = `รวม ${totalCases} เคส (${formatShortTHB(totalSum)})`;
-            subText = `OT: ${otRecs.length} เคส | Holiday: ${holRecs.length} เคส`;
+              ctx.font = '500 10px Kanit, sans-serif';
+              const textW = ctx.measureText(otText).width;
+              const boxW = textW + 12;
+              const boxH = 17;
+              const yBoxBottom = yBarTop - 6;
+              const yBoxTop = yBoxBottom - boxH;
+              const xBoxLeft = Math.max(x.left + 2, Math.min(xOtAnchor - (boxW / 2), x.right - boxW - 2));
+
+              // Dashed pointer line & connector dot
+              ctx.beginPath();
+              ctx.strokeStyle = '#0d9488';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([2, 2]);
+              ctx.moveTo(xOtAnchor, yBarTop);
+              ctx.lineTo(xOtAnchor, yBoxBottom + 2);
+              ctx.stroke();
+              ctx.setLineDash([]);
+
+              // Anchor dot on bar top
+              ctx.fillStyle = '#0d9488';
+              ctx.beginPath();
+              ctx.arc(xOtAnchor, yBarTop, 2, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Callout box
+              ctx.fillStyle = '#ffffff';
+              ctx.strokeStyle = '#0d9488';
+              ctx.lineWidth = 1;
+              drawRoundRect(ctx, xBoxLeft, yBoxTop, boxW, boxH, 4);
+              ctx.fill();
+              ctx.stroke();
+
+              // Callout text
+              ctx.fillStyle = '#0f766e';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(otText, xBoxLeft + (boxW / 2), yBoxTop + (boxH / 2));
+            }
           }
 
-          // Measure text width
-          const mainWidth = ctx.measureText(mainText).width;
-          const boxWidth = Math.max(mainWidth + 16, 120);
-          const boxHeight = 19;
+          // 2. Draw Holiday Category Label ABOVE the Holiday segment (if active)
+          if (holRecs.length > 0 || holSum > 0) {
+            const segWidth = Math.abs(xHolEnd - xOtEnd);
+            if (segWidth > 14) {
+              const xHolAnchor = xOtEnd + (segWidth * 0.5);
+              const holText = (hbarDisplayMode === 'amount')
+                ? `Hol: ${formatShortTHB(holSum)} (${holRecs.length})`
+                : `Holiday: ${holRecs.length} เคส`;
 
-          // Y Position of callout tag above the bar
-          const yBoxBottom = yBarTop - 7;
-          const yBoxTop = yBoxBottom - boxHeight;
+              ctx.font = '500 10px Kanit, sans-serif';
+              const textW = ctx.measureText(holText).width;
+              const boxW = textW + 12;
+              const boxH = 17;
+              const yBoxBottom = yBarTop - 6;
+              const yBoxTop = yBoxBottom - boxH;
+              const xBoxLeft = Math.max(x.left + 2, Math.min(xHolAnchor - (boxW / 2), x.right - boxW - 2));
 
-          // Center box around xAnchor, clamped inside chart area
-          const xBoxLeft = Math.max(x.left + 4, Math.min(xAnchor - 14, x.right - boxWidth - 4));
-          const xBoxRight = xBoxLeft + boxWidth;
+              // Dashed pointer line & connector dot
+              ctx.beginPath();
+              ctx.strokeStyle = '#d97706';
+              ctx.lineWidth = 1;
+              ctx.setLineDash([2, 2]);
+              ctx.moveTo(xHolAnchor, yBarTop);
+              ctx.lineTo(xHolAnchor, yBoxBottom + 2);
+              ctx.stroke();
+              ctx.setLineDash([]);
 
-          // 1. Draw Pointer Line with Connector Dot
-          ctx.beginPath();
-          ctx.strokeStyle = '#0d9488'; // Teal brand pointer
-          ctx.lineWidth = 1.2;
-          ctx.setLineDash([2, 2]); // Elegant dashed pointer
-          ctx.moveTo(xAnchor, yBarTop);
-          ctx.lineTo(xAnchor, yBoxBottom + 2);
-          ctx.stroke();
-          ctx.setLineDash([]); // Reset line dash
+              // Anchor dot on bar top
+              ctx.fillStyle = '#f59e0b';
+              ctx.beginPath();
+              ctx.arc(xHolAnchor, yBarTop, 2, 0, Math.PI * 2);
+              ctx.fill();
 
-          // Connector Dot on bar edge
-          ctx.fillStyle = '#0d9488';
-          ctx.beginPath();
-          ctx.arc(xAnchor, yBarTop, 2.2, 0, Math.PI * 2);
-          ctx.fill();
+              // Callout box
+              ctx.fillStyle = '#ffffff';
+              ctx.strokeStyle = '#f59e0b';
+              ctx.lineWidth = 1;
+              drawRoundRect(ctx, xBoxLeft, yBoxTop, boxW, boxH, 4);
+              ctx.fill();
+              ctx.stroke();
 
-          // 2. Draw Callout Box (Modern 5.0 Bright White Tag with subtle shadow)
-          ctx.shadowColor = 'rgba(15, 23, 42, 0.06)';
-          ctx.shadowBlur = 6;
-          ctx.shadowOffsetY = 2;
+              // Callout text
+              ctx.fillStyle = '#b45309';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(holText, xBoxLeft + (boxW / 2), yBoxTop + (boxH / 2));
+            }
+          }
 
-          ctx.fillStyle = '#ffffff';
-          ctx.strokeStyle = '#e2e8f0';
-          ctx.lineWidth = 1;
+          // 3. Draw Grand Total Label AT THE END (TAIL / RIGHT) OF THE BAR
+          const xBarEnd = Math.max(xOtEnd, xHolEnd);
+          const totalText = (hbarDisplayMode === 'amount')
+            ? `รวม ${formatShortTHB(totalSum)} (${totalCases})`
+            : `รวม ${totalCases} เคส (${formatShortTHB(totalSum)})`;
 
-          // Rounded rectangle
-          const r = 5;
-          ctx.beginPath();
-          ctx.moveTo(xBoxLeft + r, yBoxTop);
-          ctx.lineTo(xBoxRight - r, yBoxTop);
-          ctx.quadraticCurveTo(xBoxRight, yBoxTop, xBoxRight, yBoxTop + r);
-          ctx.lineTo(xBoxRight, yBoxBottom - r);
-          ctx.quadraticCurveTo(xBoxRight, yBoxBottom, xBoxRight - r, yBoxBottom);
-          ctx.lineTo(xBoxLeft + r, yBoxBottom);
-          ctx.quadraticCurveTo(xBoxLeft, yBoxBottom, xBoxLeft, yBoxBottom - r);
-          ctx.lineTo(xBoxLeft, yBoxTop + r);
-          ctx.quadraticCurveTo(xBoxLeft, yBoxTop, xBoxLeft + r, yBoxTop);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.shadowColor = 'transparent'; // Reset shadow
-
-          // 3. Draw Callout Text
-          ctx.fillStyle = '#0f172a';
           ctx.font = '600 11px Kanit, sans-serif';
-          ctx.textAlign = 'left';
+          const totalW = ctx.measureText(totalText).width;
+          const pillW = totalW + 14;
+          const pillH = 20;
+          const xPillLeft = xBarEnd + 8;
+          const yPillTop = yCenter - (pillH / 2);
+
+          // Subtle shadow for total pill
+          ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetY = 1;
+
+          ctx.fillStyle = '#f8fafc';
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1;
+          drawRoundRect(ctx, xPillLeft, yPillTop, pillW, pillH, 6);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.shadowColor = 'transparent';
+
+          // Total text
+          ctx.fillStyle = '#0f172a';
+          ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(mainText, xBoxLeft + 8, yBoxTop + boxHeight / 2);
+          ctx.fillText(totalText, xPillLeft + (pillW / 2), yCenter);
         });
 
         ctx.restore();
@@ -1210,7 +1305,7 @@
               hoverBackgroundColor: '#0f766e',
               borderRadius: { topLeft: 4, bottomLeft: 4, topRight: 0, bottomRight: 0 },
               borderSkipped: false,
-              barPercentage: 0.55,
+              barPercentage: 0.52,
               categoryPercentage: 0.85,
             },
             {
@@ -1220,7 +1315,7 @@
               hoverBackgroundColor: '#d97706',
               borderRadius: { topRight: 4, bottomRight: 4, topLeft: 0, bottomLeft: 0 },
               borderSkipped: false,
-              barPercentage: 0.55,
+              barPercentage: 0.52,
               categoryPercentage: 0.85,
             }
           ]
@@ -1232,10 +1327,10 @@
           maintainAspectRatio: false,
           layout: {
             padding: {
-              right: 25,
+              right: 125, // Ample space for total label at tail end
               left: 10,
-              top: 28,
-              bottom: 15
+              top: 26,
+              bottom: 12
             }
           },
           scales: {
@@ -1266,7 +1361,7 @@
               display: false
             },
             datalabels: {
-              display: false // Turned off inside the bar to prevent clutter as requested
+              display: false // Inside bar disabled
             },
             tooltip: {
               titleFont: { family: 'Kanit', size: 12 },
@@ -1295,44 +1390,158 @@
       });
     }
 
-    // Render Secondary Charts (Monthly Trend & OT Type Doughnut)
-    function renderCharts() {
-      // 1. Line Trend Chart
-      const allMonths = [...new Set(approvedRecords.map(r => r.Month).filter(Boolean))].sort();
-      const centers = [...new Set(filteredRecords.map(r => r.Center).filter(Boolean))].sort();
+    // Custom Chart.js Plugin: Leader Lines with Callout Labels outside the Doughnut Chart
+    const doughnutLeaderLinePlugin = {
+      id: 'doughnutLeaderLinePlugin',
+      afterDraw(chart) {
+        const { ctx, chartArea: { width, height } } = chart;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || !meta.data.length) return;
 
-      const colorPalette = [
-        { border: '#0d9488', bg: 'rgba(13, 148, 136, 0.08)' },
-        { border: '#0284c7', bg: 'rgba(2, 132, 199, 0.08)' },
-        { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.08)' },
-        { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)' },
-        { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.08)' },
-        { border: '#10b981', bg: 'rgba(16, 185, 129, 0.08)' }
-      ];
+        const dataset = chart.data.datasets[0];
+        const total = dataset.data.reduce((a, b) => a + (Number(b) || 0), 0);
+        if (total === 0) return;
 
-      const trendDatasets = centers.map((center, idx) => {
-        const color = colorPalette[idx % colorPalette.length];
-        const centerRecords = filteredRecords.filter(r => r.Center === center);
-        const dataPoints = allMonths.map(m => {
-          return centerRecords.filter(r => r.Month === m).reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+        ctx.save();
+        ctx.font = '500 10.5px Kanit, sans-serif';
+
+        meta.data.forEach((arc, i) => {
+          const val = dataset.data[i];
+          if (!val) return;
+          const pct = ((val / total) * 100);
+          if (pct < 3) return; // Skip tiny slices to prevent overlapping
+
+          const count = chart._otTypeCounts ? (chart._otTypeCounts[chart.data.labels[i]] || 0) : 0;
+          const labelText = `${chart.data.labels[i]}: ${count} เคส (${pct.toFixed(1)}%)`;
+
+          const centerPoint = arc.getCenterPoint();
+          const angle = (arc.startAngle + arc.endAngle) / 2;
+          const outerRadius = arc.outerRadius;
+
+          // Anchor point at the outer edge of doughnut slice
+          const xAnchor = arc.x + Math.cos(angle) * outerRadius;
+          const yAnchor = arc.y + Math.sin(angle) * outerRadius;
+
+          // Elbow point extending outward
+          const lineLength = 15;
+          const xElbow = arc.x + Math.cos(angle) * (outerRadius + lineLength);
+          const yElbow = arc.y + Math.sin(angle) * (outerRadius + lineLength);
+
+          // Horizontal end direction based on side of circle
+          const isRight = Math.cos(angle) >= 0;
+          const horizontalLength = 16;
+          const xEnd = isRight ? (xElbow + horizontalLength) : (xElbow - horizontalLength);
+          const yEnd = yElbow;
+
+          // 1. Draw pointer line
+          ctx.beginPath();
+          ctx.strokeStyle = dataset.backgroundColor[i] || '#0d9488';
+          ctx.lineWidth = 1.2;
+          ctx.moveTo(xAnchor, yAnchor);
+          ctx.lineTo(xElbow, yElbow);
+          ctx.lineTo(xEnd, yEnd);
+          ctx.stroke();
+
+          // Anchor dot at slice edge
+          ctx.fillStyle = dataset.backgroundColor[i] || '#0d9488';
+          ctx.beginPath();
+          ctx.arc(xAnchor, yAnchor, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2. Draw Callout Box outside
+          const textW = ctx.measureText(labelText).width;
+          const boxW = textW + 10;
+          const boxH = 18;
+          const xBox = isRight ? xEnd + 2 : (xEnd - boxW - 2);
+          const yBox = yEnd - (boxH / 2);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1;
+          drawRoundRect(ctx, xBox, yBox, boxW, boxH, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          // 3. Draw text
+          ctx.fillStyle = '#1e293b';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(labelText, xBox + 5, yEnd);
         });
 
-        return {
-          label: center,
-          data: dataPoints,
-          borderColor: color.border,
-          backgroundColor: color.bg,
-          borderWidth: 2,
-          tension: 0.35,
-          pointRadius: 3,
-          pointHoverRadius: 5,
-          fill: true
-        };
-      });
+        ctx.restore();
+      }
+    };
+
+    // Render Secondary Charts (Monthly Trend & OT Type Doughnut)
+    function renderCharts() {
+      // 1. Line Trend Chart (Modern 5.0 with Total vs Center Switcher)
+      const allMonths = [...new Set(approvedRecords.map(r => r.Month).filter(Boolean))].sort();
+      const centers = [...new Set(filteredRecords.map(r => r.Center).filter(Boolean))].sort();
 
       const trendCtx = document.getElementById('monthlyTrendChart')?.getContext('2d');
       if (trendCtx) {
         if (trendChartInstance) trendChartInstance.destroy();
+
+        let trendDatasets = [];
+
+        if (trendDisplayMode === 'total') {
+          // Aggregate Total View with Smooth Gradient
+          const totalPoints = allMonths.map(m => {
+            return filteredRecords.filter(r => r.Month === m).reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+          });
+
+          // Canvas gradient
+          const grad = trendCtx.createLinearGradient(0, 0, 0, 180);
+          grad.addColorStop(0, 'rgba(13, 148, 136, 0.28)');
+          grad.addColorStop(1, 'rgba(13, 148, 136, 0.01)');
+
+          trendDatasets = [{
+            label: 'ยอดเบิก OT รวมทุกศูนย์',
+            data: totalPoints,
+            borderColor: '#0d9488',
+            backgroundColor: grad,
+            borderWidth: 2.5,
+            tension: 0.35,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#0d9488',
+            pointBorderWidth: 2
+          }];
+        } else {
+          // Per-Center View with distinct, modern executive colors
+          const colorPalette = [
+            { border: '#0d9488', bg: 'rgba(13, 148, 136, 0.05)' },
+            { border: '#0284c7', bg: 'rgba(2, 132, 199, 0.05)' },
+            { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.05)' },
+            { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.05)' },
+            { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.05)' },
+            { border: '#10b981', bg: 'rgba(16, 185, 129, 0.05)' }
+          ];
+
+          trendDatasets = centers.map((center, idx) => {
+            const color = colorPalette[idx % colorPalette.length];
+            const centerRecords = filteredRecords.filter(r => r.Center === center);
+            const dataPoints = allMonths.map(m => {
+              return centerRecords.filter(r => r.Month === m).reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+            });
+
+            return {
+              label: center,
+              data: dataPoints,
+              borderColor: color.border,
+              backgroundColor: color.bg,
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              fill: false
+            };
+          });
+        }
+
         trendChartInstance = new Chart(trendCtx, {
           type: 'line',
           data: {
@@ -1342,22 +1551,25 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: { padding: { top: 6, bottom: 4, left: 4, right: 6 } },
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { font: { family: 'Kanit', size: 10 } }
+                ticks: { font: { family: 'Kanit', size: 10 }, color: '#64748b' }
               },
               y: {
                 beginAtZero: true,
                 ticks: {
                   callback: val => '฿' + (val >= 1000 ? (val / 1000).toLocaleString() + 'k' : val),
-                  font: { family: 'Kanit', size: 10 }
+                  font: { family: 'Kanit', size: 10 },
+                  color: '#64748b'
                 },
                 grid: { color: 'rgba(226, 232, 240, 0.6)' }
               }
             },
             plugins: {
               legend: {
+                display: trendDisplayMode === 'center',
                 position: 'top',
                 labels: { boxWidth: 8, font: { family: 'Kanit', size: 10 } }
               },
@@ -1367,7 +1579,7 @@
                 bodyFont: { family: 'Kanit', size: 10 },
                 callbacks: {
                   label: function(ctx) {
-                    return `${ctx.dataset.label}: ${formatTHB(ctx.parsed.y)}`;
+                    return ` ${ctx.dataset.label}: ${formatTHB(ctx.parsed.y)}`;
                   }
                 }
               }
@@ -1376,7 +1588,7 @@
         });
       }
 
-      // 2. Doughnut Chart (by OT_Type)
+      // 2. Doughnut Chart (by OT_Type) with external pointer leader lines
       const typeTotals = {};
       const typeCounts = {};
       filteredRecords.forEach(r => {
@@ -1396,7 +1608,7 @@
       const doughnutCtx = document.getElementById('otTypeDoughnutChart')?.getContext('2d');
       if (doughnutCtx) {
         if (doughnutChartInstance) doughnutChartInstance.destroy();
-        const pluginsList = (typeof ChartDataLabels !== 'undefined') ? [ChartDataLabels] : [];
+
         doughnutChartInstance = new Chart(doughnutCtx, {
           type: 'doughnut',
           data: {
@@ -1409,33 +1621,17 @@
               hoverOffset: 5
             }]
           },
-          plugins: pluginsList,
+          plugins: [doughnutLeaderLinePlugin],
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: 6 },
+            layout: { padding: 22 }, // Extra padding for external leader lines & boxes
             plugins: {
               legend: {
-                position: 'right',
-                labels: { 
-                  boxWidth: 8, 
-                  font: { family: 'Kanit', size: 10 },
-                  generateLabels: function(chart) {
-                    const data = chart.data;
-                    if (data.labels.length && data.datasets.length) {
-                      return data.labels.map((label, i) => {
-                        const cnt = typeCounts[label] || 0;
-                        return {
-                          text: `${label} (${cnt})`,
-                          fillStyle: data.datasets[0].backgroundColor[i],
-                          hidden: isNaN(data.datasets[0].data[i]),
-                          index: i
-                        };
-                      });
-                    }
-                    return [];
-                  }
-                }
+                display: false // Disabled in favor of clear external callouts
+              },
+              datalabels: {
+                display: false // Disabled inside doughut ring
               },
               tooltip: {
                 titleFont: { family: 'Kanit', size: 11 },
@@ -1449,26 +1645,14 @@
                     return ` ยอดรวม: ${formatTHB(val)} (${cnt} เคส | ${pct}%)`;
                   }
                 }
-              },
-              datalabels: {
-                color: '#ffffff',
-                font: { family: 'Kanit', weight: '600', size: 10 },
-                textShadowBlur: 4,
-                textShadowColor: 'rgba(0, 0, 0, 0.4)',
-                formatter: (value, ctx) => {
-                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                  const pct = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
-                  if (pct < 6) return '';
-                  return `${pct}%`;
-                },
-                textAlign: 'center',
-                align: 'center',
-                anchor: 'center'
               }
             },
             cutout: '58%'
           }
         });
+
+        // Attach counts reference for leader line rendering
+        doughnutChartInstance._otTypeCounts = typeCounts;
       }
 
       lucide.createIcons();
