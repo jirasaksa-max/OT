@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OT Lasik Financial Dashboard (16:9 Landscape)</title>
+  <title>OT Lasik Real-time Financial Dashboard 5.0</title>
 
-  <!-- Google Fonts: Prompt & Inter for high-end typography -->
+  <!-- Google Fonts: Kanit (Full weights for 5.0 typography) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,8 +24,8 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Prompt', 'Inter', '-apple-system', 'sans-serif'],
-            mono: ['Inter', 'monospace'],
+            sans: ['Kanit', '-apple-system', 'sans-serif'],
+            mono: ['Kanit', 'monospace'],
           },
           colors: {
             brand: {
@@ -40,9 +40,10 @@
             }
           },
           boxShadow: {
-            'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
-            'card': '0 8px 20px -4px rgba(15, 23, 42, 0.04), 0 4px 8px -4px rgba(15, 23, 42, 0.02)',
-            'float': '0 20px 30px -8px rgba(15, 23, 42, 0.08), 0 8px 12px -6px rgba(15, 23, 42, 0.04)',
+            'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
+            'card': '0 4px 20px -2px rgba(15, 23, 42, 0.03), 0 2px 6px -1px rgba(15, 23, 42, 0.02)',
+            'float': '0 16px 32px -8px rgba(15, 23, 42, 0.06), 0 6px 12px -4px rgba(15, 23, 42, 0.03)',
+            'glow-teal': '0 0 20px -3px rgba(13, 148, 136, 0.15)',
           }
         }
       }
@@ -50,9 +51,12 @@
   </script>
 
   <style>
+    * {
+      font-family: 'Kanit', sans-serif !important;
+    }
+
     body {
-      font-family: 'Prompt', 'Inter', sans-serif;
-      background-color: #f8fafc;
+      background-color: #fcfdfe;
       color: #0f172a;
       -webkit-font-smoothing: antialiased;
     }
@@ -63,7 +67,7 @@
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: #f8fafc;
       border-radius: 8px;
     }
     ::-webkit-scrollbar-thumb {
@@ -74,62 +78,57 @@
       background: #94a3b8;
     }
 
-    .pulse-dot {
-      animation: softPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes softPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.2); }
-    }
-
     .glass-nav {
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
-    /* 16:9 Aspect Ratio Dashboard Container Optimization */
-    @media (min-width: 1280px) {
-      .dashboard-container {
-        aspect-ratio: 16 / 9;
-        max-height: 100vh;
-      }
+    /* 5.0 Ambient Light Border */
+    .card-50 {
+      background: #ffffff;
+      border: 1px solid #edf2f7;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-50:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.05);
     }
   </style>
 </head>
 
-<body class="min-h-screen bg-slate-50/70 text-slate-900 flex flex-col antialiased selection:bg-teal-500 selection:text-white">
+<body class="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col antialiased selection:bg-teal-600 selection:text-white">
 
-  <!-- Header Navigation (Compact 16:9 Friendly) -->
+  <!-- Header Navigation (Clean White 5.0) -->
   <header class="sticky top-0 z-40 border-b border-slate-200/80 glass-nav shadow-subtle">
     <div class="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 sm:h-16">
 
         <!-- Logo & Center Identifier -->
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-teal-600 via-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-teal-500/20 ring-2 ring-teal-50">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-teal-600 via-teal-500 to-cyan-400 flex items-center justify-center text-white shadow-md shadow-teal-500/15 ring-2 ring-teal-50">
             <i data-lucide="activity" class="w-5 h-5 stroke-[2.2]"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight">OT Lasik Analytics</h1>
-              <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
-                เฉพาะ Approved
+              <h1 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight">OT Lasik Analytics 5.0</h1>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                เฉพาะรายการ Approved
               </span>
-              <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                <i data-lucide="monitor" class="w-3 h-3"></i>
+              <span class="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                <i data-lucide="monitor" class="w-3 h-3 text-teal-600"></i>
                 16:9 Widescreen
               </span>
             </div>
             <div class="flex items-center gap-2 text-[11px] text-slate-500">
-              <span class="flex items-center gap-1">
+              <span class="flex items-center gap-1 font-normal">
                 <i data-lucide="file-spreadsheet" class="w-3 h-3 text-teal-600"></i>
                 ชีต: <strong class="text-slate-700 font-semibold" id="headerSheetTab">OT_Data</strong>
               </span>
               <span class="text-slate-300">•</span>
-              <a id="headerSheetLink" href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 hover:underline flex items-center gap-0.5" title="เปิด Google Sheets ต้นทาง">
-                <span>เปิดชีตสด</span>
+              <a id="headerSheetLink" href="https://docs.google.com/spreadsheets/d/1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 hover:underline flex items-center gap-0.5 font-medium" title="เปิด Google Sheets ต้นทาง">
+                <span>เปิดแผ่นงานต้นทาง</span>
                 <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
               </a>
             </div>
@@ -138,10 +137,11 @@
 
         <!-- Action Controls -->
         <div class="flex items-center gap-2 sm:gap-2.5">
-          <!-- Connection Status Pill -->
-          <div id="liveStatusBadge" class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100/90 border border-slate-200 text-xs text-slate-600">
-            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500 pulse-dot"></span>
-            <span id="syncStatusLabel" class="font-medium text-[11px]">ข้อมูลพร้อมใช้งาน</span>
+          <!-- Last Sync Status Badge (No Polling, syncs on load/refresh) -->
+          <div id="liveStatusBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-xs text-slate-600">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="syncStatusLabel" class="font-normal text-[11px]">ซิงค์เมื่อเปิดหน้าเว็บ</span>
+            <span id="lastSyncTime" class="text-[10px] text-slate-400 font-mono"></span>
           </div>
 
           <!-- Fullscreen Toggle Button -->
@@ -150,10 +150,10 @@
             <span class="hidden md:inline text-xs">เต็มจอ</span>
           </button>
 
-          <!-- Refresh Button -->
-          <button id="refreshBtn" onclick="refreshLiveData()" class="p-2 sm:px-3 sm:py-1.5 text-slate-700 hover:text-teal-700 bg-white hover:bg-slate-50 rounded-xl text-xs font-medium border border-slate-200 shadow-subtle flex items-center gap-1.5 transition active:scale-95">
+          <!-- Manual Refresh Button -->
+          <button id="refreshBtn" onclick="refreshLiveData()" class="p-2 sm:px-3.5 sm:py-1.5 text-slate-700 hover:text-teal-700 bg-white hover:bg-slate-50 rounded-xl text-xs font-medium border border-slate-200 shadow-subtle flex items-center gap-1.5 transition active:scale-95" title="ดึงข้อมูลล่าสุด">
             <i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5 text-slate-500"></i>
-            <span class="hidden sm:inline text-xs">รีเฟรช</span>
+            <span class="hidden sm:inline text-xs">รีเฟรชข้อมูล</span>
           </button>
 
           <!-- Settings Button -->
@@ -167,20 +167,20 @@
     </div>
   </header>
 
-  <!-- Main Content Container (Widescreen 16:9 Responsive) -->
-  <main class="flex-1 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 space-y-3.5">
+  <!-- Main Content Container (Widescreen 16:9 Landscape) -->
+  <main class="flex-1 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 space-y-3.5">
 
-    <!-- Compact Unified Filter Bar -->
-    <section class="bg-white rounded-2xl p-3 sm:p-3.5 border border-slate-200/80 shadow-subtle">
+    <!-- Compact Modern 5.0 Filter Bar -->
+    <section class="card-50 rounded-2xl p-3 sm:p-3.5 shadow-subtle">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
         
-        <!-- Filter Dropdowns Grid -->
+        <!-- Filter Controls Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 flex-1">
           
           <!-- Filter: Center -->
           <div>
             <div class="relative">
-              <select id="filterCenter" onchange="applyFilters()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/70 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+              <select id="filterCenter" onchange="applyFilters()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
                 <option value="ALL">ทุกศูนย์บริการ (All)</option>
               </select>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2 pointer-events-none"></i>
@@ -190,7 +190,7 @@
           <!-- Filter: Year -->
           <div>
             <div class="relative">
-              <select id="filterYear" onchange="handleYearChange()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/70 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+              <select id="filterYear" onchange="handleYearChange()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
                 <option value="ALL">ทุกปี (All Years)</option>
               </select>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2 pointer-events-none"></i>
@@ -200,7 +200,7 @@
           <!-- Filter: Month -->
           <div>
             <div class="relative">
-              <select id="filterMonth" onchange="applyFilters()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/70 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+              <select id="filterMonth" onchange="applyFilters()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
                 <option value="ALL">ทุกเดือน (All Months)</option>
               </select>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2 pointer-events-none"></i>
@@ -210,7 +210,7 @@
           <!-- Filter: OT Type -->
           <div>
             <div class="relative">
-              <select id="filterOtType" onchange="applyFilters()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/70 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
+              <select id="filterOtType" onchange="applyFilters()" class="w-full text-xs rounded-xl border border-slate-200 pl-2.5 pr-7 py-1.5 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition appearance-none cursor-pointer">
                 <option value="ALL">ทุกประเภทหัตถการ</option>
               </select>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2 pointer-events-none"></i>
@@ -220,7 +220,7 @@
           <!-- Search Keyword -->
           <div class="col-span-2 sm:col-span-1">
             <div class="relative">
-              <input type="text" id="filterKeyword" oninput="applyFilters()" placeholder="ค้นหาบุคลากร, หมายเหตุ..." class="w-full text-xs rounded-xl border border-slate-200 pl-8 pr-2.5 py-1.5 bg-slate-50/70 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition placeholder:text-slate-400" />
+              <input type="text" id="filterKeyword" oninput="applyFilters()" placeholder="ค้นหาบุคลากร, หมายเหตุ..." class="w-full text-xs rounded-xl border border-slate-200 pl-8 pr-2.5 py-1.5 bg-slate-50/50 hover:bg-white focus:bg-white focus:ring-2 focus:ring-teal-500 focus:outline-none transition placeholder:text-slate-400" />
               <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
             </div>
           </div>
@@ -229,32 +229,32 @@
 
         <!-- Filter Actions -->
         <div class="flex items-center gap-2 self-end lg:self-center">
-          <button onclick="resetFilters()" class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition flex items-center gap-1">
+          <button onclick="resetFilters()" class="px-3 py-1.5 text-xs font-normal text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition flex items-center gap-1">
             <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-            <span>ล้าง</span>
+            <span>ล้างตัวกรอง</span>
           </button>
-          <button onclick="exportToCSV()" class="px-3.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 rounded-xl flex items-center gap-1.5 transition active:scale-95 shadow-subtle">
+          <button onclick="exportToCSV()" class="px-3.5 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 rounded-xl flex items-center gap-1.5 transition active:scale-95 shadow-subtle">
             <i data-lucide="download" class="w-3 h-3"></i>
-            <span>CSV</span>
+            <span>ส่งออก CSV</span>
           </button>
         </div>
 
       </div>
     </section>
 
-    <!-- KPI Summary Row (4 High-Density Compact Cards) -->
+    <!-- KPI Summary Row (Bright White Clean Cards) -->
     <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
       
       <!-- KPI 1: Net Calculated Price -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-subtle hover:border-teal-300 transition">
+      <div class="card-50 rounded-2xl p-3.5 sm:p-4 hover:border-teal-300">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">ยอดเบิกสุทธิ (Approved)</span>
-          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center ring-2 ring-emerald-50">
+          <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">ยอดเบิกสุทธิ (Approved)</span>
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center ring-2 ring-emerald-50">
             <i data-lucide="circle-dollar-sign" class="w-4 h-4"></i>
           </div>
         </div>
-        <div class="mt-2">
-          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono" id="kpiTotalApproved">฿0</h2>
+        <div class="mt-1.5">
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" id="kpiTotalApproved">฿0</h2>
           <div class="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-600 font-medium">
             <i data-lucide="shield-check" class="w-3 h-3"></i>
             <span>อนุมัติสมบูรณ์ (Approved Only)</span>
@@ -263,60 +263,60 @@
       </div>
 
       <!-- KPI 2: Approved Cases Count -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-subtle hover:border-sky-300 transition">
+      <div class="card-50 rounded-2xl p-3.5 sm:p-4 hover:border-sky-300">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">จำนวนเคสที่อนุมัติ</span>
-          <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center ring-2 ring-sky-50">
+          <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">จำนวนเคสที่อนุมัติ</span>
+          <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center ring-2 ring-sky-50">
             <i data-lucide="check-circle-2" class="w-4 h-4"></i>
           </div>
         </div>
-        <div class="mt-2">
+        <div class="mt-1.5">
           <div class="flex items-baseline gap-1.5">
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono" id="kpiTotalCases">0</h2>
-            <span class="text-xs text-slate-500 font-medium">รายการ</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" id="kpiTotalCases">0</h2>
+            <span class="text-xs text-slate-500 font-normal">รายการ</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1 font-mono" id="kpiAveragePerCase">เฉลี่ย ฿0 / รายการ</p>
+          <p class="text-[11px] text-slate-500 mt-1" id="kpiAveragePerCase">เฉลี่ย ฿0 / รายการ</p>
         </div>
       </div>
 
       <!-- KPI 3: Top Center by Cost -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-subtle hover:border-indigo-300 transition">
+      <div class="card-50 rounded-2xl p-3.5 sm:p-4 hover:border-indigo-300">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">ศูนย์มียอดเบิกสูงสุด</span>
-          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center ring-2 ring-indigo-50">
+          <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">ศูนย์มียอดเบิกสูงสุด</span>
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center ring-2 ring-indigo-50">
             <i data-lucide="building-2" class="w-4 h-4"></i>
           </div>
         </div>
-        <div class="mt-2">
+        <div class="mt-1.5">
           <h2 class="text-base sm:text-lg font-bold text-slate-900 truncate" id="kpiTopCenter">-</h2>
-          <p class="text-[11px] text-slate-500 mt-1 font-mono" id="kpiTopCenterAmount">฿0 (0% ของยอดรวม)</p>
+          <p class="text-[11px] text-slate-500 mt-1" id="kpiTopCenterAmount">฿0 (0% ของยอดรวม)</p>
         </div>
       </div>
 
       <!-- KPI 4: Top OT Type -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-subtle hover:border-amber-300 transition">
+      <div class="card-50 rounded-2xl p-3.5 sm:p-4 hover:border-amber-300">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">หัตถการ OT ยอดนิยม</span>
-          <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center ring-2 ring-amber-50">
+          <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">หัตถการ OT สูงสุด</span>
+          <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center ring-2 ring-amber-50">
             <i data-lucide="pie-chart" class="w-4 h-4"></i>
           </div>
         </div>
-        <div class="mt-2">
+        <div class="mt-1.5">
           <h2 class="text-base sm:text-lg font-bold text-slate-900 truncate" id="kpiTopOtType">-</h2>
-          <p class="text-[11px] text-slate-500 mt-1 font-mono" id="kpiTopOtTypeAmount">฿0</p>
+          <p class="text-[11px] text-slate-500 mt-1" id="kpiTopOtTypeAmount">฿0</p>
         </div>
       </div>
 
     </section>
 
-    <!-- Main Visual Analytics Area (16:9 Landscape Optimized 2-Column Grid) -->
+    <!-- Main Visual Analytics Area (16:9 Landscape 2-Column Grid) -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
       
-      <!-- Left Column (58% width): Horizontal Stacked Bar Chart (Holiday vs Overtime by Center) -->
-      <div class="lg:col-span-7 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-card flex flex-col justify-between">
+      <!-- Left Column (58% width): Horizontal Stacked Bar Chart with Pointer Line Total Labels -->
+      <div class="lg:col-span-7 card-50 rounded-2xl p-4 sm:p-5 shadow-card flex flex-col justify-between">
         
         <!-- Section Header with Mode Toggle & Stats -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-150 gap-2">
           <div>
             <div class="flex items-center gap-2">
               <div class="w-7 h-7 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
@@ -327,18 +327,18 @@
               </h3>
             </div>
             <p class="text-[11px] text-slate-500 mt-0.5">
-              กราฟแท่งแนวนอนแสดงสัดส่วนผสมระหว่างวันหยุด (Holiday) และล่วงเวลาปกติ (Overtime) พร้อมตัวเลขกำกับ
+              แสดงสัดส่วนผสมระหว่างวันหยุด (Holiday) และล่วงเวลาปกติ (Overtime) พร้อมป้ายชี้จำนวนรวมด้านบนแท่งกราฟ
             </p>
           </div>
 
           <!-- View Toggle: Amount vs Cases -->
           <div class="flex items-center gap-2 self-start sm:self-auto">
-            <span class="text-[11px] font-medium text-slate-500 hidden sm:inline">แสดงค่า:</span>
+            <span class="text-[11px] font-normal text-slate-500 hidden sm:inline">แสดงค่า:</span>
             <div class="inline-flex rounded-xl border border-slate-200 bg-slate-100/90 p-0.5 text-xs">
               <button id="hbarModeAmountBtn" onclick="toggleHBarMode('amount')" class="px-2.5 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition text-[11px]">
                 ยอดเงิน (฿)
               </button>
-              <button id="hbarModeCasesBtn" onclick="toggleHBarMode('cases')" class="px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition text-[11px]">
+              <button id="hbarModeCasesBtn" onclick="toggleHBarMode('cases')" class="px-2.5 py-1 rounded-lg font-normal text-slate-600 hover:text-slate-900 transition text-[11px]">
                 จำนวนเคส
               </button>
             </div>
@@ -347,23 +347,27 @@
 
         <!-- Legend Pills Indicator -->
         <div class="flex items-center justify-between pt-2.5 px-1 text-xs">
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4 flex-wrap">
             <div class="flex items-center gap-1.5">
-              <span class="w-3 h-3 rounded-md bg-teal-600"></span>
-              <span class="font-medium text-slate-700 text-xs">Overtime (วันปกติ / ล่วงเวลา)</span>
+              <span class="w-3 h-3 rounded-md bg-[#0d9488]"></span>
+              <span class="font-normal text-slate-700 text-xs">Overtime (วันปกติ / ล่วงเวลา)</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <span class="w-3 h-3 rounded-md bg-amber-500"></span>
-              <span class="font-medium text-slate-700 text-xs">Holiday (วันหยุด / นักขัตฤกษ์)</span>
+              <span class="w-3 h-3 rounded-md bg-[#f59e0b]"></span>
+              <span class="font-normal text-slate-700 text-xs">Holiday (วันหยุด / นักขัตฤกษ์)</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-slate-400 text-[11px]">
+              <span class="w-3 h-0.5 bg-slate-400"></span>
+              <span>เส้นชี้ป้ายยอดรวมด้านบน</span>
             </div>
           </div>
-          <span id="centerBarTotalSummary" class="font-mono font-semibold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md text-[11px]">
-            รวม ฿0
+          <span id="centerBarTotalSummary" class="font-medium text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-md text-[11px]">
+            รวม 0 เคส | ฿0
           </span>
         </div>
 
         <!-- Chart Canvas Container -->
-        <div class="relative w-full h-[360px] sm:h-[400px] lg:h-[440px] mt-2">
+        <div class="relative w-full h-[400px] sm:h-[450px] lg:h-[480px] mt-2">
           <canvas id="centerHolidayOvertimeChart"></canvas>
         </div>
 
@@ -373,27 +377,27 @@
       <div class="lg:col-span-5 flex flex-col gap-3.5 sm:gap-4">
         
         <!-- Top Right: Monthly Trend Line Chart -->
-        <div class="bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 shadow-card flex-1 flex flex-col justify-between">
-          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div class="card-50 rounded-2xl p-4 sm:p-4.5 shadow-card flex-1 flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-150">
             <div>
               <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                 <i data-lucide="trending-up" class="w-3.5 h-3.5 text-teal-600"></i>
                 <span>แนวโน้มยอดเบิก OT รายเดือนตามศูนย์</span>
               </h3>
-              <p class="text-[11px] text-slate-500">เปรียบเทียบมูลค่าเบิกจ่ายแต่ละสาขา</p>
+              <p class="text-[11px] text-slate-500">เปรียบเทียบมูลค่าเบิกจ่ายจริงแต่ละสาขา</p>
             </div>
-            <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+            <span class="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
               บาท (THB)
             </span>
           </div>
-          <div class="relative w-full h-[175px] sm:h-[190px] mt-2">
+          <div class="relative w-full h-[180px] sm:h-[200px] mt-2">
             <canvas id="monthlyTrendChart"></canvas>
           </div>
         </div>
 
         <!-- Bottom Right: OT_Type Doughnut Breakdown -->
-        <div class="bg-white rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 shadow-card flex-1 flex flex-col justify-between">
-          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div class="card-50 rounded-2xl p-4 sm:p-4.5 shadow-card flex-1 flex flex-col justify-between">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-150">
             <div>
               <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                 <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-teal-600"></i>
@@ -401,11 +405,11 @@
               </h3>
               <p class="text-[11px] text-slate-500">จำแนกตามมูลค่าและจำนวนเคส</p>
             </div>
-            <span id="doughnutTotalBadge" class="text-[10px] font-mono font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
+            <span id="doughnutTotalBadge" class="text-[10px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
               0 เคส
             </span>
           </div>
-          <div class="relative w-full h-[175px] sm:h-[190px] mt-2 flex items-center justify-center">
+          <div class="relative w-full h-[180px] sm:h-[200px] mt-2 flex items-center justify-center">
             <canvas id="otTypeDoughnutChart"></canvas>
           </div>
         </div>
@@ -417,7 +421,7 @@
   </main>
 
   <!-- Modal: Configuration -->
-  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-900/30 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-float border border-slate-150 space-y-5">
       
       <!-- Modal Header -->
@@ -427,8 +431,8 @@
             <i data-lucide="database" class="w-5 h-5"></i>
           </div>
           <div>
-            <h4 class="font-bold text-slate-900 text-base">ตั้งค่าการเชื่อมโยงข้อมูล Real-time</h4>
-            <p class="text-xs text-slate-500">ดึงข้อมูลจากชีต OT_Data ผ่าน Google Visualization API</p>
+            <h4 class="font-bold text-slate-900 text-base">ตั้งค่าการเชื่อมโยง Google Sheet</h4>
+            <p class="text-xs text-slate-500">ดึงข้อมูลสดจากชีตผ่าน Google Visualization API</p>
           </div>
         </div>
         <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition">
@@ -454,14 +458,9 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">รอบเวลาดึงข้อมูลอัตโนมัติ:</label>
-            <select id="cfgAutoInterval" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
-              <option value="0">ปิดการดึงอัตโนมัติ (Manual)</option>
-              <option value="15000">ทุก 15 วินาที</option>
-              <option value="30000" selected>ทุก 30 วินาที (แนะนำ)</option>
-              <option value="60000">ทุก 1 นาที</option>
-            </select>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/70">
+            <div class="text-xs font-medium text-slate-700">การซิงค์ข้อมูล:</div>
+            <div class="text-[11px] text-slate-500 mt-0.5">ซิงค์อัตโนมัติเมื่อเปิด/รีเฟรชหน้าเว็บ หรือกดปุ่มรีเฟรช</div>
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">หรืออัปโหลดไฟล์ CSV:</label>
@@ -486,7 +485,7 @@
 
       <!-- Modal Footer -->
       <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
-        <button onclick="closeConfigModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
+        <button onclick="closeConfigModal()" class="px-4 py-2 text-xs font-normal text-slate-600 hover:bg-slate-100 rounded-xl transition">
           ยกเลิก
         </button>
         <button onclick="saveAndSyncConfig()" class="px-4 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md shadow-teal-700/15 transition">
@@ -509,36 +508,33 @@
 
   <!-- Application Logic -->
   <script>
+    // Set global default font family for Chart.js to Kanit
+    Chart.defaults.font.family = 'Kanit';
+
     // System Defaults
     const DEFAULT_SPREADSHEET_ID = "1Foty7xCOyVtUria-I3dyFwWMEGHEdwo9vUwH-_hPtBk";
     const DEFAULT_SHEET_TAB = "OT_Data";
 
-    // Immediate Initial Dataset (Authentic OT Lasik structure)
+    // Immediate Initial Dataset
     const SEED_DATASET = [
-      { ID: "OT-001", OT_Date: "2026-07-08", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", WorkDayType: "Overtime", Note: "เคสเหมาจ่ายเช้า" },
-      { ID: "OT-002", OT_Date: "2026-07-22", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ReLEx SMILE", Units: 5, CalculatedPrice: 10000, Status: "Approved", WorkDayType: "Overtime", Note: "เคสช่วงเย็น" },
-      { ID: "OT-003", OT_Date: "2026-08-05", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา (OR Nurse)", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 2800, Status: "Approved", WorkDayType: "Overtime", Note: "ช่วยผ่าตัด" },
-      { ID: "OT-004", OT_Date: "2026-08-15", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "PRK", Units: 3, CalculatedPrice: 3900, Status: "Approved", WorkDayType: "Holiday", Note: "เคสตรวจพิเศษ (วันเสาร์)" },
-      { ID: "OT-005", OT_Date: "2026-08-20", Center: "ศูนย์เลสิก พัทยา", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2400, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันอาทิตย์ (Holiday)" },
-      { ID: "OT-006", OT_Date: "2026-08-28", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 6000, Status: "Pending", WorkDayType: "Overtime", Note: "รอเอกสารเพิ่มเติม" },
-      { ID: "OT-007", OT_Date: "2026-09-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 6, CalculatedPrice: 12000, Status: "Approved", WorkDayType: "Overtime", Note: "SMILE Pro เคสเช้า" },
-      { ID: "OT-008", OT_Date: "2026-09-06", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. วรวัฒน์", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 6000, Status: "Approved", WorkDayType: "Holiday", Note: "เคสวันอาทิตย์ (Holiday)" },
-      { ID: "OT-009", OT_Date: "2026-09-10", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "พญ. มนัสนันท์", OT_Type: "PRK", Units: 4, CalculatedPrice: 5200, Status: "Approved", WorkDayType: "Overtime", Note: "เคสราชการ" },
-      { ID: "OT-010", OT_Date: "2026-09-14", Center: "ศูนย์เลสิก พัทยา", StaffName: "นพ. สิทธิพร", OT_Type: "Femto-LASIK", Units: 3, CalculatedPrice: 4500, Status: "Approved", WorkDayType: "Overtime", Note: "เคสนักท่องเที่ยว" },
-      { ID: "OT-011", OT_Date: "2026-09-18", Center: "ศูนย์เลสิก สยาม", StaffName: "พว. สุชาดา", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 5000, Status: "Approved", WorkDayType: "Overtime", Note: "เคสใส่เลนส์เสริม" },
-      { ID: "OT-012", OT_Date: "2026-09-20", Center: "ศูนย์เลสิก พระราม 9", StaffName: "ดร. อภิสิทธิ์ (นักทัศนมาตร)", OT_Type: "Refraction & Screening", Units: 8, CalculatedPrice: 4000, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันอาทิตย์ (Holiday)" },
-      { ID: "OT-013", OT_Date: "2026-09-25", Center: "ศูนย์เลสิก สยาม", StaffName: "นพ. เอกชัย", OT_Type: "Femto-LASIK", Units: 2, CalculatedPrice: 3000, Status: "Rejected", WorkDayType: "Overtime", Note: "ข้อมูลซ้ำซ้อน" },
-      { ID: "OT-014", OT_Date: "2026-10-02", Center: "ศูนย์เลสิก สยาม", StaffName: "พญ. นภัสสร (จักษุแพทย์)", OT_Type: "ReLEx SMILE", Units: 7, CalculatedPrice: 14000, Status: "Approved", WorkDayType: "Holiday", Note: "วันหยุดนักขัตฤกษ์" },
-      { ID: "OT-015", OT_Date: "2026-10-05", Center: "ศูนย์เลสิก พระราม 9", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ICL Implant", Units: 3, CalculatedPrice: 9000, Status: "Approved", WorkDayType: "Overtime", Note: "ICL Toric" },
-      { ID: "OT-016", OT_Date: "2026-10-08", Center: "ศูนย์เลสิก เชียงใหม่", StaffName: "นพ. ธีรเดช", OT_Type: "Femto-LASIK", Units: 5, CalculatedPrice: 7500, Status: "Approved", WorkDayType: "Overtime", Note: "เคสช่วงบ่าย" },
-      { ID: "OT-017", OT_Date: "2026-10-12", Center: "ศูนย์เลสิก พัทยา", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 8, CalculatedPrice: 2400, Status: "Approved", WorkDayType: "Holiday", Note: "เวรฉุกเฉินวันหยุด" }
+      { ID: "OT-001", OT_Date: "2026-07-08", Center: "ศูนย์เลสิกยันฮี", StaffName: "พญ. นภัสสร", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 67375, Status: "Approved", WorkDayType: "Overtime", Note: "เคสเช้า" },
+      { ID: "OT-002", OT_Date: "2026-07-12", Center: "ศูนย์เลสิกยันฮี", StaffName: "นพ. กิตติศักดิ์", OT_Type: "ReLEx SMILE", Units: 8, CalculatedPrice: 292325, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันอาทิตย์ (Holiday)" },
+      { ID: "OT-003", OT_Date: "2026-08-05", Center: "ศูนย์เลสิกไทยนครินทร์", StaffName: "พว. สุชาดา", OT_Type: "Femto-LASIK", Units: 4, CalculatedPrice: 25400, Status: "Approved", WorkDayType: "Overtime", Note: "ช่วยผ่าตัด" },
+      { ID: "OT-004", OT_Date: "2026-08-16", Center: "ศูนย์เลสิกไทยนครินทร์", StaffName: "นพ. ธีรเดช", OT_Type: "PRK", Units: 7, CalculatedPrice: 140800, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันอาทิตย์ (Holiday)" },
+      { ID: "OT-005", OT_Date: "2026-08-20", Center: "ศูนย์เลสิกพระรามเก้า", StaffName: "พว. รุ่งทิพย์", OT_Type: "On-Call / Standby", Units: 6, CalculatedPrice: 35700, Status: "Approved", WorkDayType: "Overtime", Note: "เคสเย็น" },
+      { ID: "OT-006", OT_Date: "2026-08-23", Center: "ศูนย์เลสิกพระรามเก้า", StaffName: "นพ. วรวัฒน์", OT_Type: "ICL Implant", Units: 5, CalculatedPrice: 126000, Status: "Approved", WorkDayType: "Holiday", Note: "วันหยุดนักขัตฤกษ์" },
+      { ID: "OT-007", OT_Date: "2026-09-02", Center: "ศูนย์เลสิกสมิติเวช ไชน่าทาวน์", StaffName: "พญ. มนัสนันท์", OT_Type: "ReLEx SMILE", Units: 3, CalculatedPrice: 12000, Status: "Approved", WorkDayType: "Overtime", Note: "SMILE Pro" },
+      { ID: "OT-008", OT_Date: "2026-09-06", Center: "ศูนย์เลสิกสมิติเวช ไชน่าทาวน์", StaffName: "นพ. สิทธิพร", OT_Type: "Femto-LASIK", Units: 6, CalculatedPrice: 110800, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันอาทิตย์" },
+      { ID: "OT-009", OT_Date: "2026-09-10", Center: "ศูนย์เลสิกอินทรารัตน์", StaffName: "นพ. เอกชัย", OT_Type: "PRK", Units: 2, CalculatedPrice: 5500, Status: "Approved", WorkDayType: "Overtime", Note: "เคสปกติ" },
+      { ID: "OT-010", OT_Date: "2026-09-13", Center: "ศูนย์เลสิกอินทรารัตน์", StaffName: "ดร. อภิสิทธิ์", OT_Type: "Femto-LASIK", Units: 5, CalculatedPrice: 77500, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันหยุด" },
+      { ID: "OT-011", OT_Date: "2026-09-18", Center: "ศูนย์เลสิกธรรมศาสตร์เฉลิมพระเกียรติ", StaffName: "พญ. นภัสสร", OT_Type: "ICL Implant", Units: 2, CalculatedPrice: 3500, Status: "Approved", WorkDayType: "Overtime", Note: "เคสใส่เลนส์" },
+      { ID: "OT-012", OT_Date: "2026-09-20", Center: "ศูนย์เลสิกธรรมศาสตร์เฉลิมพระเกียรติ", StaffName: "นพ. ธีรเดช", OT_Type: "Refraction & Screening", Units: 4, CalculatedPrice: 70400, Status: "Approved", WorkDayType: "Holiday", Note: "เวรวันอาทิตย์" }
     ];
 
     // Reactive Global State
     let masterDataset = [...SEED_DATASET];
     let approvedRecords = [];
     let filteredRecords = [];
-    let autoRefreshTimer = null;
 
     // Chart Instances
     let hbarChartInstance = null;
@@ -557,7 +553,7 @@
     function formatShortTHB(amount) {
       const num = Number(amount) || 0;
       if (num >= 1000000) return '฿' + (num / 1000000).toFixed(1) + 'M';
-      if (num >= 1000) return '฿' + (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + 'k';
+      if (num >= 1000) return '฿' + (num / 1000).toFixed(1) + 'k';
       return '฿' + num.toLocaleString();
     }
 
@@ -612,12 +608,11 @@
       }
     }
 
-    // Comprehensive OT_Date Parser
+    // Comprehensive Date Parser
     function parseOTDate(rawVal, formattedVal = '') {
       const str = String(formattedVal || rawVal || '').trim();
       const rawStr = String(rawVal || '').trim();
       
-      // 1. Google Visualization Date(YYYY, M, D)
       const gvizMatch = rawStr.match(/Date\((\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+))?/i) || str.match(/Date\((\d+)\s*,\s*(\d+)\s*(?:,\s*(\d+))?/i);
       if (gvizMatch) {
         let year = parseInt(gvizMatch[1], 10);
@@ -634,7 +629,6 @@
         };
       }
 
-      // 2. DD/MM/YYYY or DD-MM-YYYY
       const ddmmyyyy = str.match(/^(\d{1,2})[\/\.-](\d{1,2})[\/\.-](\d{2,4})$/);
       if (ddmmyyyy) {
         let day = parseInt(ddmmyyyy[1], 10);
@@ -652,7 +646,6 @@
         };
       }
 
-      // 3. YYYY-MM-DD
       const yyyymmdd = str.match(/^(\d{4})[\/\.-](\d{1,2})[\/\.-](\d{1,2})$/);
       if (yyyymmdd) {
         let year = parseInt(yyyymmdd[1], 10);
@@ -669,7 +662,6 @@
         };
       }
 
-      // 4. Fallback Native JS Date parser
       const parsed = new Date(str);
       if (!isNaN(parsed.getTime())) {
         let year = parsed.getFullYear();
@@ -684,7 +676,6 @@
         };
       }
 
-      // 5. Default fallback
       const cleanStr = str.replace(/[^0-9\-\/]/g, '');
       const fallbackMonth = cleanStr.length >= 7 ? cleanStr.slice(0, 7) : '2026-09';
       return {
@@ -747,9 +738,8 @@
       );
     }
 
-    // Determine whether a record is Holiday or Regular Overtime
+    // Determine Holiday vs Regular Overtime
     function detectWorkDayType(r, dateObj, noteStr, otTypeStr) {
-      // 1. Check direct column in sheet
       const explicitCol = getRowVal(r, [
         'WorkDayType', 'Work_Day_Type', 'Day_Type', 'DayType', 'WorkType', 'Work_Type', 
         'Holiday_Type', 'Holiday', 'IsHoliday', 'ประเภทวัน', 'วันหยุด', 'เวรวันหยุด'
@@ -764,13 +754,11 @@
         }
       }
 
-      // 2. Check keywords in Note or OT_Type
       const combinedText = `${noteStr || ''} ${otTypeStr || ''}`.toLowerCase();
       if (combinedText.includes('วันหยุด') || combinedText.includes('นักขัตฤกษ์') || combinedText.includes('วันอาทิตย์') || combinedText.includes('วันเสาร์') || combinedText.includes('holiday') || combinedText.includes('weekend')) {
         return 'Holiday';
       }
 
-      // 3. Check day of week: Saturday (6) or Sunday (0)
       if (dateObj && typeof dateObj.getDay === 'function') {
         const dayOfWeek = dateObj.getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -829,14 +817,13 @@
           Units: parseFloat(getRowVal(r, ['Units', 'Cases', 'Hours', 'จำนวน']) || 1) || 1,
           CalculatedPrice: Number(price) || 0,
           Status: status,
-          WorkDayType: workDayType, // 'Holiday' or 'Overtime'
+          WorkDayType: workDayType,
           Note: note
         };
       });
     }
 
     function processApprovedData() {
-      // ดึงเฉพาะ Approved ของคอลัมน์ Status เท่านั้น
       approvedRecords = masterDataset.filter(row => isApprovedStatus(row.Status));
 
       populateYearSelect();
@@ -1030,13 +1017,134 @@
       const amountBtn = document.getElementById('hbarModeAmountBtn');
       const casesBtn = document.getElementById('hbarModeCasesBtn');
       const activeClass = "px-2.5 py-1 rounded-lg font-semibold text-teal-800 bg-white shadow-subtle transition text-[11px]";
-      const inactiveClass = "px-2.5 py-1 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition text-[11px]";
+      const inactiveClass = "px-2.5 py-1 rounded-lg font-normal text-slate-600 hover:text-slate-900 transition text-[11px]";
 
       if (amountBtn) amountBtn.className = (mode === 'amount') ? activeClass : inactiveClass;
       if (casesBtn) casesBtn.className = (mode === 'cases') ? activeClass : inactiveClass;
 
       renderCenterHorizontalBarChart();
     }
+
+    // Custom Chart.js Plugin: Draws Elegant Total Label & Pointer Line Above Each Horizontal Stacked Bar
+    const centerCalloutPointerPlugin = {
+      id: 'centerCalloutPointerPlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx, scales: { x, y } } = chart;
+        const meta0 = chart.getDatasetMeta(0);
+        const meta1 = chart.getDatasetMeta(1);
+        if (!meta0 || !meta1 || !meta0.data.length) return;
+
+        ctx.save();
+        ctx.font = '500 11px Kanit, sans-serif';
+
+        meta0.data.forEach((bar0, idx) => {
+          const bar1 = meta1.data[idx];
+          if (!bar0 || !bar1) return;
+
+          const centerName = chart.data.labels[idx];
+          const recs = filteredRecords.filter(r => r.Center === centerName);
+          const otRecs = recs.filter(r => r.WorkDayType === 'Overtime');
+          const holRecs = recs.filter(r => r.WorkDayType === 'Holiday');
+
+          const otSum = otRecs.reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+          const holSum = holRecs.reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
+          const totalSum = otSum + holSum;
+          const totalCases = otRecs.length + holRecs.length;
+
+          if (totalSum === 0 && totalCases === 0) return;
+
+          // Bar geometry
+          const yCenter = bar0.y;
+          const barHeight = bar0.height || 22;
+          const yBarTop = yCenter - barHeight / 2;
+
+          // Rightmost coordinate of the stacked bar
+          const x0End = bar0.x;
+          const x1End = bar1.x;
+          const xRightEnd = Math.max(x0End, x1End);
+          const xBase = x.getPixelForValue(0);
+
+          // Pointer Anchor point on the bar
+          const xAnchor = Math.max(xBase + 24, Math.min(xBase + (xRightEnd - xBase) * 0.45, xRightEnd - 12));
+
+          // Label content
+          let mainText = '';
+          let subText = '';
+          if (hbarDisplayMode === 'amount') {
+            mainText = `รวม ${formatTHB(totalSum)} (${totalCases} เคส)`;
+            subText = `OT: ${formatShortTHB(otSum)} (${otRecs.length}) | Hol: ${formatShortTHB(holSum)} (${holRecs.length})`;
+          } else {
+            mainText = `รวม ${totalCases} เคส (${formatShortTHB(totalSum)})`;
+            subText = `OT: ${otRecs.length} เคส | Holiday: ${holRecs.length} เคส`;
+          }
+
+          // Measure text width
+          const mainWidth = ctx.measureText(mainText).width;
+          const boxWidth = Math.max(mainWidth + 16, 120);
+          const boxHeight = 19;
+
+          // Y Position of callout tag above the bar
+          const yBoxBottom = yBarTop - 7;
+          const yBoxTop = yBoxBottom - boxHeight;
+
+          // Center box around xAnchor, clamped inside chart area
+          const xBoxLeft = Math.max(x.left + 4, Math.min(xAnchor - 14, x.right - boxWidth - 4));
+          const xBoxRight = xBoxLeft + boxWidth;
+
+          // 1. Draw Pointer Line with Connector Dot
+          ctx.beginPath();
+          ctx.strokeStyle = '#0d9488'; // Teal brand pointer
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([2, 2]); // Elegant dashed pointer
+          ctx.moveTo(xAnchor, yBarTop);
+          ctx.lineTo(xAnchor, yBoxBottom + 2);
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset line dash
+
+          // Connector Dot on bar edge
+          ctx.fillStyle = '#0d9488';
+          ctx.beginPath();
+          ctx.arc(xAnchor, yBarTop, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2. Draw Callout Box (Modern 5.0 Bright White Tag with subtle shadow)
+          ctx.shadowColor = 'rgba(15, 23, 42, 0.06)';
+          ctx.shadowBlur = 6;
+          ctx.shadowOffsetY = 2;
+
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1;
+
+          // Rounded rectangle
+          const r = 5;
+          ctx.beginPath();
+          ctx.moveTo(xBoxLeft + r, yBoxTop);
+          ctx.lineTo(xBoxRight - r, yBoxTop);
+          ctx.quadraticCurveTo(xBoxRight, yBoxTop, xBoxRight, yBoxTop + r);
+          ctx.lineTo(xBoxRight, yBoxBottom - r);
+          ctx.quadraticCurveTo(xBoxRight, yBoxBottom, xBoxRight - r, yBoxBottom);
+          ctx.lineTo(xBoxLeft + r, yBoxBottom);
+          ctx.quadraticCurveTo(xBoxLeft, yBoxBottom, xBoxLeft, yBoxBottom - r);
+          ctx.lineTo(xBoxLeft, yBoxTop + r);
+          ctx.quadraticCurveTo(xBoxLeft, yBoxTop, xBoxLeft + r, yBoxTop);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.shadowColor = 'transparent'; // Reset shadow
+
+          // 3. Draw Callout Text
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '600 11px Kanit, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(mainText, xBoxLeft + 8, yBoxTop + boxHeight / 2);
+        });
+
+        ctx.restore();
+      }
+    };
 
     // Horizontal Stacked Bar Chart: Center x (Holiday vs Overtime)
     function renderCenterHorizontalBarChart() {
@@ -1063,18 +1171,14 @@
       // Prepare Overtime vs Holiday data
       const overtimeData = [];
       const holidayData = [];
-      const overtimeCases = [];
-      const holidayCases = [];
 
       sortedCenters.forEach(center => {
         const centerRecs = filteredRecords.filter(r => r.Center === center);
 
-        // Overtime subset
         const otSubset = centerRecs.filter(r => r.WorkDayType === 'Overtime');
         const otSum = otSubset.reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
         const otCount = otSubset.length;
 
-        // Holiday subset
         const holSubset = centerRecs.filter(r => r.WorkDayType === 'Holiday');
         const holSum = holSubset.reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
         const holCount = holSubset.length;
@@ -1086,9 +1190,6 @@
           overtimeData.push(otCount);
           holidayData.push(holCount);
         }
-
-        overtimeCases.push(otCount);
-        holidayCases.push(holCount);
       });
 
       if (hbarChartInstance) {
@@ -1096,7 +1197,6 @@
       }
 
       const ctx = canvas.getContext('2d');
-      const pluginsList = (typeof ChartDataLabels !== 'undefined') ? [ChartDataLabels] : [];
 
       hbarChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -1108,42 +1208,42 @@
               data: overtimeData,
               backgroundColor: '#0d9488', // Teal-600
               hoverBackgroundColor: '#0f766e',
-              borderRadius: 4,
+              borderRadius: { topLeft: 4, bottomLeft: 4, topRight: 0, bottomRight: 0 },
               borderSkipped: false,
-              barPercentage: 0.72,
-              categoryPercentage: 0.8,
+              barPercentage: 0.55,
+              categoryPercentage: 0.85,
             },
             {
               label: 'Holiday (วันหยุด / นักขัตฤกษ์)',
               data: holidayData,
               backgroundColor: '#f59e0b', // Amber-500
               hoverBackgroundColor: '#d97706',
-              borderRadius: 4,
+              borderRadius: { topRight: 4, bottomRight: 4, topLeft: 0, bottomLeft: 0 },
               borderSkipped: false,
-              barPercentage: 0.72,
-              categoryPercentage: 0.8,
+              barPercentage: 0.55,
+              categoryPercentage: 0.85,
             }
           ]
         },
-        plugins: pluginsList,
+        plugins: [centerCalloutPointerPlugin],
         options: {
           indexAxis: 'y', // HORIZONTAL BAR
           responsive: true,
           maintainAspectRatio: false,
           layout: {
             padding: {
-              right: 40,
+              right: 25,
               left: 10,
-              top: 10,
-              bottom: 10
+              top: 28,
+              bottom: 15
             }
           },
           scales: {
             x: {
               stacked: true,
-              grid: { color: 'rgba(226, 232, 240, 0.7)' },
+              grid: { color: 'rgba(226, 232, 240, 0.6)' },
               ticks: {
-                font: { family: 'Inter', size: 11 },
+                font: { family: 'Kanit', size: 11 },
                 callback: function(val) {
                   if (hbarDisplayMode === 'amount') {
                     return '฿' + (val >= 1000 ? (val / 1000).toLocaleString() + 'k' : val);
@@ -1156,16 +1256,21 @@
               stacked: true,
               grid: { display: false },
               ticks: {
-                font: { family: 'Prompt', size: 12, weight: '600' },
+                font: { family: 'Kanit', size: 12, weight: '500' },
                 color: '#1e293b'
               }
             }
           },
           plugins: {
             legend: {
-              display: false // We show our refined custom legend pill bar above
+              display: false
+            },
+            datalabels: {
+              display: false // Turned off inside the bar to prevent clutter as requested
             },
             tooltip: {
+              titleFont: { family: 'Kanit', size: 12 },
+              bodyFont: { family: 'Kanit', size: 11 },
               callbacks: {
                 label: function(ctx) {
                   const center = sortedCenters[ctx.dataIndex];
@@ -1184,32 +1289,6 @@
                   return ` รวมทั้งสิ้น: ${formatTHB(grand)} (${recs.length} เคส)`;
                 }
               }
-            },
-            datalabels: {
-              color: '#ffffff',
-              font: { family: 'Prompt', weight: '700', size: 11 },
-              textShadowBlur: 4,
-              textShadowColor: 'rgba(0, 0, 0, 0.45)',
-              display: function(ctx) {
-                const val = ctx.dataset.data[ctx.dataIndex];
-                return val > 0;
-              },
-              formatter: function(value, ctx) {
-                const center = sortedCenters[ctx.dataIndex];
-                const isOt = ctx.datasetIndex === 0;
-                const subset = filteredRecords.filter(r => r.Center === center && (isOt ? r.WorkDayType === 'Overtime' : r.WorkDayType === 'Holiday'));
-                const sum = subset.reduce((a, b) => a + (Number(b.CalculatedPrice) || 0), 0);
-                const cnt = subset.length;
-
-                if (hbarDisplayMode === 'amount') {
-                  if (sum < 1000) return `${formatShortTHB(sum)}`;
-                  return `${formatShortTHB(sum)} (${cnt})`;
-                } else {
-                  return `${cnt} เคส`;
-                }
-              },
-              align: 'center',
-              anchor: 'center'
             }
           }
         }
@@ -1266,13 +1345,13 @@
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { font: { family: 'Prompt', size: 10 } }
+                ticks: { font: { family: 'Kanit', size: 10 } }
               },
               y: {
                 beginAtZero: true,
                 ticks: {
                   callback: val => '฿' + (val >= 1000 ? (val / 1000).toLocaleString() + 'k' : val),
-                  font: { family: 'Inter', size: 10 }
+                  font: { family: 'Kanit', size: 10 }
                 },
                 grid: { color: 'rgba(226, 232, 240, 0.6)' }
               }
@@ -1280,9 +1359,12 @@
             plugins: {
               legend: {
                 position: 'top',
-                labels: { boxWidth: 8, font: { family: 'Prompt', size: 10 } }
+                labels: { boxWidth: 8, font: { family: 'Kanit', size: 10 } }
               },
+              datalabels: { display: false },
               tooltip: {
+                titleFont: { family: 'Kanit', size: 11 },
+                bodyFont: { family: 'Kanit', size: 10 },
                 callbacks: {
                   label: function(ctx) {
                     return `${ctx.dataset.label}: ${formatTHB(ctx.parsed.y)}`;
@@ -1337,7 +1419,7 @@
                 position: 'right',
                 labels: { 
                   boxWidth: 8, 
-                  font: { family: 'Prompt', size: 10 },
+                  font: { family: 'Kanit', size: 10 },
                   generateLabels: function(chart) {
                     const data = chart.data;
                     if (data.labels.length && data.datasets.length) {
@@ -1356,6 +1438,8 @@
                 }
               },
               tooltip: {
+                titleFont: { family: 'Kanit', size: 11 },
+                bodyFont: { family: 'Kanit', size: 10 },
                 callbacks: {
                   label: function(context) {
                     const val = context.parsed;
@@ -1368,7 +1452,7 @@
               },
               datalabels: {
                 color: '#ffffff',
-                font: { family: 'Prompt', weight: '600', size: 10 },
+                font: { family: 'Kanit', weight: '600', size: 10 },
                 textShadowBlur: 4,
                 textShadowColor: 'rgba(0, 0, 0, 0.4)',
                 formatter: (value, ctx) => {
@@ -1430,6 +1514,12 @@
         if (parsedRows.length > 0) {
           masterDataset = normalizeRecords(parsedRows);
           processApprovedData();
+
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          const syncTimeEl = document.getElementById('lastSyncTime');
+          if (syncTimeEl) syncTimeEl.innerText = `(${timeStr})`;
+
           setConnectionStatus(true, `ซิงค์สด (${approvedRecords.length} Approved)`);
           showToastNotification(`ซิงค์ข้อมูลเรียลไทม์สำเร็จ (${approvedRecords.length} รายการ)`, 'success');
         }
@@ -1469,7 +1559,7 @@
 
     async function refreshLiveData() {
       const icon = document.getElementById('refreshIcon');
-      icon.classList.add('animate-spin');
+      if (icon) icon.classList.add('animate-spin');
 
       const sheetId = localStorage.getItem('ot_sheet_id') || DEFAULT_SPREADSHEET_ID;
       const sheetTab = localStorage.getItem('ot_sheet_tab') || DEFAULT_SHEET_TAB;
@@ -1479,23 +1569,18 @@
       } catch (err) {
         console.warn('JSONP sync fallback...', err.message);
         setConnectionStatus(false, 'ออฟไลน์ / ใช้ข้อมูลแคช');
-        showToastNotification(`ไม่สามารถซิงค์ได้: กำลังแสดงข้อมูลแคชสำรอง`, 'error');
+        showToastNotification(`ไม่สามารถซิงค์ได้: กำลังแสดงข้อมูลสำรอง`, 'error');
       } finally {
-        icon.classList.remove('animate-spin');
+        if (icon) icon.classList.remove('animate-spin');
       }
     }
 
     function setConnectionStatus(isOnline, text) {
       const dot = document.getElementById('syncDot');
       const label = document.getElementById('syncStatusLabel');
-      if (isOnline) {
-        dot.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
-        label.innerText = text;
-        label.className = "font-medium text-emerald-700";
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-amber-500";
-        label.innerText = text;
-        label.className = "font-medium text-amber-700";
+      if (label) label.innerText = text;
+      if (dot) {
+        dot.className = isOnline ? "w-2 h-2 rounded-full bg-emerald-500" : "w-2 h-2 rounded-full bg-amber-500";
       }
     }
 
@@ -1587,7 +1672,6 @@
     function openConfigModal() {
       document.getElementById('cfgSheetId').value = localStorage.getItem('ot_sheet_id') || DEFAULT_SPREADSHEET_ID;
       document.getElementById('cfgSheetTab').value = localStorage.getItem('ot_sheet_tab') || DEFAULT_SHEET_TAB;
-      document.getElementById('cfgAutoInterval').value = localStorage.getItem('ot_auto_interval') || '30000';
       document.getElementById('configModal').classList.remove('hidden');
     }
 
@@ -1598,7 +1682,6 @@
     function resetDefaultConfig() {
       document.getElementById('cfgSheetId').value = DEFAULT_SPREADSHEET_ID;
       document.getElementById('cfgSheetTab').value = DEFAULT_SHEET_TAB;
-      document.getElementById('cfgAutoInterval').value = '30000';
       showToastNotification('คืนค่าเริ่มต้นเรียบร้อย', 'info');
     }
 
@@ -1608,31 +1691,15 @@
       if (match && match[1]) sheetId = match[1];
 
       const sheetTab = document.getElementById('cfgSheetTab').value.trim() || DEFAULT_SHEET_TAB;
-      const interval = document.getElementById('cfgAutoInterval').value;
 
       localStorage.setItem('ot_sheet_id', sheetId);
       localStorage.setItem('ot_sheet_tab', sheetTab);
-      localStorage.setItem('ot_auto_interval', interval);
 
       document.getElementById('headerSheetTab').innerText = sheetTab;
       document.getElementById('headerSheetLink').href = `https://docs.google.com/spreadsheets/d/${sheetId}/edit?usp=sharing`;
 
-      setupAutoRefreshPolling(interval);
       closeConfigModal();
       refreshLiveData();
-    }
-
-    function setupAutoRefreshPolling(intervalMs) {
-      if (autoRefreshTimer) {
-        clearInterval(autoRefreshTimer);
-        autoRefreshTimer = null;
-      }
-      const ms = parseInt(intervalMs, 10);
-      if (ms > 0) {
-        autoRefreshTimer = setInterval(() => {
-          refreshLiveData();
-        }, ms);
-      }
     }
 
     function showToastNotification(message, type = 'info') {
@@ -1640,23 +1707,27 @@
       const msg = document.getElementById('toastMsg');
       const icon = document.getElementById('toastIcon');
 
-      msg.innerText = message;
-      if (type === 'success') {
-        icon.className = 'text-emerald-400';
-        icon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
-      } else if (type === 'error') {
-        icon.className = 'text-rose-400';
-        icon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
-      } else {
-        icon.className = 'text-teal-400';
-        icon.innerHTML = '<i data-lucide="info" class="w-5 h-5"></i>';
+      if (msg) msg.innerText = message;
+      if (icon) {
+        if (type === 'success') {
+          icon.className = 'text-emerald-400';
+          icon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+        } else if (type === 'error') {
+          icon.className = 'text-rose-400';
+          icon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+        } else {
+          icon.className = 'text-teal-400';
+          icon.innerHTML = '<i data-lucide="info" class="w-5 h-5"></i>';
+        }
       }
       lucide.createIcons();
 
-      toast.classList.remove('hidden');
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3500);
+      if (toast) {
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 3500);
+      }
     }
 
     window.onload = function() {
@@ -1667,17 +1738,13 @@
       document.getElementById('headerSheetTab').innerText = savedSheetTab;
       document.getElementById('headerSheetLink').href = `https://docs.google.com/spreadsheets/d/${savedSheetId}/edit?usp=sharing`;
 
-      // 1. Instant Render
+      // 1. Instant Render with cache/seed
       processApprovedData();
 
-      // 2. Setup periodic interval
-      const savedInterval = localStorage.getItem('ot_auto_interval') || '30000';
-      setupAutoRefreshPolling(savedInterval);
-
-      // 3. Trigger live Google Sheets sync in background
+      // 2. Sync once upon web load/refresh only (No periodic background polling)
       setTimeout(() => {
         refreshLiveData();
-      }, 300);
+      }, 200);
     };
   </script>
 </body>
